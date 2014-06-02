@@ -8,6 +8,7 @@
 *.so
 *.dylib
 *.dll
+*.dSYM
 
 # Compiled Static libraries
 *.lai
@@ -19,3 +20,5 @@
 *.exe
 *.out
 *.app
+
+splay_tree_test
