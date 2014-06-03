@@ -23,17 +23,25 @@ void TreeNode::splay(SplayTree *inTree){
 	if (grandParent == NULL) {
 		// zig
 		this->rotate(parent, inTree);
+
+		parent->key -= this->key;
 	}
 	else if ((grandParent->right == parent && parent->left == this)
 		|| (grandParent->left == parent && parent->right == this)) {
 		// zig-zag
 		this->rotate(parent, inTree);
 		this->rotate(grandParent, inTree);
+
+		grandParent->key -= (this->key + parent->key);
+		this->key += parent->key;
 	}
 	else {
 		// zig-zig
 		parent->rotate(grandParent, inTree);
 		this->rotate(parent, inTree);
+
+		parent->key -= this->key;
+		grandParent->key -= (this->key + parent->key);
 	}
 }
 
