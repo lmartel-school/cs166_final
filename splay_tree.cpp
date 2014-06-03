@@ -30,7 +30,6 @@ void TreeNode::splay(SplayTree *inTree){
 
 	if (grandParent == NULL) {
 		// zig
-		// parent->key -= key;
 
 		// cout << "will zig:" << parent->toString() << endl;
 
@@ -41,8 +40,6 @@ void TreeNode::splay(SplayTree *inTree){
 	else if ((grandParent->right == parent && parent->left == this)
 		|| (grandParent->left == parent && parent->right == this)) {
 		// zig-zag
-		// grandParent->key -= (this->key + parent->key);
-		// this->key += parent->key;
 
 		// cout << "will zigzag:" << grandParent->toString() << endl;
 
@@ -53,8 +50,6 @@ void TreeNode::splay(SplayTree *inTree){
 	}
 	else {
 		// zig-zig
-		// parent->key -= this->key;
-		// grandParent->key -= (this->key + parent->key);
 
 		// cout << "will zigzig:" << grandParent->toString() << endl;
 
