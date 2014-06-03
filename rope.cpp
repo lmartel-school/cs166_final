@@ -31,10 +31,12 @@ char Rope::at(int index){
 }
 
 string Rope::report(int start, int end){
+	if (end <= start) return "";
+
 	int localStart;
 	int localEnd;
 	TreeNode *startNode = this->findNodeWithCharAtIndex(this->tree->root, start, localStart);
-	TreeNode *endNode = this->findNodeWithCharAtIndex(this->tree->root, end, localEnd);
+	TreeNode *endNode = this->findNodeWithCharAtIndex(this->tree->root, end - 1, localEnd);
 	if (startNode == endNode){
 		return startNode->value->substr(start, end - start);
 	}
@@ -63,9 +65,14 @@ Rope *Rope::concat(Rope *right){
 pair<Rope *, Rope *> Rope::split(int index){
 	if (tree->root == NULL) return make_pair(new Rope(new SplayTree(NULL)), new Rope(new SplayTree(NULL)));
 	if (index < 0) return make_pair(new Rope(new SplayTree(NULL)), this);
+	
+	// cout << "seeking: " << index << endl;
+	// cout << "in: " << tree->toString() << endl;
 	int localIndex;
 	TreeNode *node = this->findNodeWithCharAtIndex(this->tree->root, index, localIndex);
-	// cout << node->toString();
+	// cout << this->report(0, this->length()) << endl;
+	
+	// cout << "found: " << node->toString() << endl;
 	
 	string *fullString = node->value;
 	int fullLength = fullString->length();
@@ -152,11 +159,7 @@ string Rope::toString(){
 
 TreeNode *Rope::findNodeWithCharAtIndex(TreeNode *node, int index, int & reportLocalIndex){
 	assert(node != NULL);
-	if (node->key <= index && node->right != NULL){
-		return this->findNodeWithCharAtIndex(node->right, index - node->key, reportLocalIndex);
-	} else if (node->left != NULL){
-		return this->findNodeWithCharAtIndex(node->left, index, reportLocalIndex);
-	} else {
+	if (node->left == NULL && node->right == NULL){
 		if (node->parent != NULL){
 			// Rebalance tree as much as possible without ripping leaves
 			node->parent->splay(this->tree);
@@ -164,11 +167,26 @@ TreeNode *Rope::findNodeWithCharAtIndex(TreeNode *node, int index, int & reportL
 		reportLocalIndex = index;
 		return node;
 	}
+
+	if (index < node->key){
+		if (node->left != NULL){
+			return this->findNodeWithCharAtIndex(node->left, index, reportLocalIndex);
+		} else {
+			assert(node->right != NULL);
+			return this->findNodeWithCharAtIndex(node->right, index, reportLocalIndex);
+		}
+	} else {
+		return this->findNodeWithCharAtIndex(node->right, index - node->key, reportLocalIndex);
+	}
 }
 
 int Rope::sumWeightsDownRightSpine(TreeNode *node){
-	if (node == NULL) return 0;
-	return node->key + sumWeightsDownRightSpine(node->right);
+	int sum = 0;
+	while (node != NULL){
+		sum += node->key;
+		node = node->right;
+	}
+	return sum;
 }
 
 string Rope::inOrder(TreeNode *node, TreeNode *start, TreeNode *end){
