@@ -1,6 +1,6 @@
 .tree-vis {
   border: 1px solid black;
-  height: 200px;
+  height: 500px;
   width: calc(100% - 678px);
   float: right;
 }
