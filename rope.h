@@ -19,11 +19,13 @@ public:
 	Rope *concat(Rope *right);
 	Rope *insert(int index, std::string *s);
 	Rope *remove(int start, int end); // incl, excl
+
+	std::string toString();
 	
 private:
 	SplayTree *tree;
 
-	SplayTree::TreeNode *findNodeWithCharAtIndex(SplayTree::TreeNode *node, int index, int *reportLocalIndex);
+	SplayTree::TreeNode *findNodeWithCharAtIndex(SplayTree::TreeNode *node, int index, int & reportLocalIndex);
 	std::string inOrder(SplayTree::TreeNode *node, SplayTree::TreeNode *start, SplayTree::TreeNode *end);
 	SplayTree::TreeNode *findNodeToReport(SplayTree::TreeNode *node, int start, int end);
 	static int sumWeightsDownRightSpine(SplayTree::TreeNode *node);
