@@ -172,7 +172,7 @@ The Rope is a somewhat complicated data structure. In order to make it easier to
 
 We believe that this visualization immensely clarifies how the Rope structure works: even if the formal description of the structure is unclear, a strong understanding of its operation can be obtained from the visualization very quickly.
 
-The visualization is based off of the $C++$ rope implementation discussed in the previous section. We implement the front-end in javascript and html using $D3$, but we store the text that is input by the user by communicating with a $C++$ program over NaCl. Of course, it would be possible to implement the Rope in javascript itself, but we avoided doing this in an effort to avoid duplication of labor.
+The visualization is based off of the $C++$ rope implementation discussed in the previous section. We implement the front-end in javascript and html using $D3$, but we store the text that is input by the user by communicating over NaCl with a $C++$ program that manages a rope. Of course, it would be possible to implement the Rope in javascript itself, but we avoided doing this in an effort to avoid duplication of labor.
 
 \begin{figure}[t]
 \begin{centering}
