@@ -136,7 +136,35 @@ This is also an efficient implementation of the operation. Since our in-order tr
 
 \section{Implementation and Benchmarking}
 
-We wrote some code.
+\begin{figure}[p]
+\begin{centering}
+\includegraphics[scale=1.0]{prepends_vs_execution}
+\caption{This graph demonstrates the running time of a benchmark that consisted of many small repeated prepend operations. We see that the rope performs significantly better than the string: the rope should support this operation very quickly, while we'd expect the C++ string to have to move everything right in order to make space at the front. Unfortunately our C++ String benchmark never terminated for the last few trials, so we have ommitted these data points. We allowed the benchmarks to run for much longer than the rope.}
+
+\end{centering}
+\end{figure}
+
+\begin{figure}[p]
+\begin{centering}
+\includegraphics[scale=1.0]{append_vs_execution}
+\caption{This graph demonstrates the running time of a benchmark that consisted of many small repeated append operations. Interestingly, the string performs significantly better than the rope. We suspect that the C++ implementation has optimized strings for the append operation: we suspect that we would see different behavior if string append were implemented naively. Also, we see that the rope performs approximately the same as it did for the prepend operation. This implies that it is agnostic to the end at which the string is inserted.}
+
+\end{centering}
+\end{figure}
+
+\begin{figure}[p]
+\begin{centering}
+\includegraphics[scale=1.0]{substring_vs_execution}
+\caption{Here we see the running time of a benchmark that consisted of extracting varying sized substrings from a large string. The string appears to dominate the substring as the size increases: the string implementation is much simpler than the rope implementation so this is not surprising.}
+\end{centering}
+\end{figure}
+
+\begin{figure}[p]
+\begin{centering}
+\includegraphics[scale=1.0]{size_vs_lookup}
+\caption{Here we see the running time of a benchmark that consisted of lookups to random indices in a very large array. As one might guess, the string dominates the rope in this category because the array should be executing in roughly constant time, while the rope will be performing a tree traversal.}
+\end{centering}
+\end{figure}
 
 \section{Visualization}
 
