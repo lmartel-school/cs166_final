@@ -1,0 +1,38 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  background-color: #fdf6e3;
+  font-family: "Andale Mono", monospace;
+}
+
+h1 {
+  font-size: 72px;
+  color: #073642;
+  border-bottom: 10px solid #073642;
+}
+
+.text-editor {
+  width: 668px;
+  display: inline-block;
+  font-size: 60px;
+  border: 10px solid #073642;
+  float: left;
+}
+
+.char {
+  color: #657b83;
+  float: left;
+  width: 36px;
+  height: 75px;
+}
+
+.char.cursor {
+  background-color: #657b83;
+  color: #fdf6e3;
+}
+
+.newline {
+  clear: left;
+  width: 0px;
+}

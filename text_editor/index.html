@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>Ropes Text Editor Visualization</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"> </script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="./text-editor.js"></script>
+    <script src="./tree-vis.js"></script>
+    <script src="./rope.js"></script>
+    <link rel="stylesheet" type="text/css" href="./editor.css"/>
+    <link rel="stylesheet" type="text/css" href="./tree.css"/>
+    <script>
+      $(document).ready(function() {
+          var r = new Rope();
+          var t = new TreeVis($('#tree'));
+          var e = new Editor($('#editor'), r, t);
+          t.redraw();
+      });
+    </script>
+  </head>
+  <body>
+    <h1>Ropes Editor:</h1>
+    <div id="editor" class="text-editor"></div>
+    <div id="tree" class="tree-vis"></div>
+  </body>
+</html>

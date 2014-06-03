@@ -21,4 +21,16 @@
 *.out
 *.app
 
+# Vim files
+.*.swp
+
+# Tex generated files
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+
+# Mac files
+.DS_Store
+
 splay_tree_test
