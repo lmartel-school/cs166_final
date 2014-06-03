@@ -1,7 +1,7 @@
 COMPILER=clang++
 OPTIONS=-g -Wall
 
-all: splay_tree_test
+all: clean splay_tree_test
 
 clean:
 	rm *.o splay_tree_test
