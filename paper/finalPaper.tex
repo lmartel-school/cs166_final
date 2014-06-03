@@ -9,10 +9,12 @@
 \usepackage{multicol}
 \usepackage{wrapfig}
 \usepackage{units}
+\usepackage{setspace}
+\doublespacing
 
 \setlength{\columnsep}{0.1pc}
 
-\title{Ropes}
+\title{Ropes - Alternative String Representation}
 \author{Leo Martel, Paul Martinez, Andy Moreland}
 \date{\today}
 \begin{document}
@@ -25,13 +27,27 @@
 
 \section{Introduction}
 
-We're gonna talk about Ropes.
+In this paper we will discuss the Rope data structure, a data structure intended to serve as a more robust and more performant alternative to the tradtional String type offered in most languages.
+The seminal paper regarding Ropes was written by Hans-J. Boehm, Russ Atkinson and Michael Plass in 1995.
+We will provide an overview of their paper, beginning with their justification for Ropes in the first place.
+We will continue with a more technical recap of the implmentation details and running time guarantees of a rope.
+As an exercise we have implemented our own Rope and we will give some rough benchmark estimates comparing various operations.
+Finally, in order to more easily show off the Rope data structure, we will discuss a visualization we created that allows one to actively interact with a Rope data structure and visualize its internal structure.
 
-\subsection{Creation}
+\section{Justification for Expanded String Type}
 
-Talk about those guys who made ropes first.
+Boehm, Russ and Plass (BRP) begin their paper by discussing some of the faults of traditional string types and the various ways that they could be improved.
+We will provide a brief summary of their points.
 
-\section{Implementation}
+Before attacking `the traditional string type,' we must first define it.
+This traditional string type we refer to is the crude fixed length arrays of characters offered
+by languages such as C as Pascal.
+We can usually access individual characters via some sort of array access and perform higher level operations such as concatenation or substrings through library functions.
+Such implementations usually do not include any metadata along with the array (such as its length), and are usually mutable.
+
+BRP list immutable strings as one of the characteristics of a more robust string type, noting that strings are often used to communicate between modules and thus one should be able to operate on a string without risk of modifying the original owner's copy of the string.
+
+\section{Implementation and Running Time}
 
 Maybe splay trees don't work.
 
