@@ -27,36 +27,42 @@
 
 \section{Introduction}
 
-In this paper we will discuss the Rope data structure, a data structure intended to serve as a more robust and more performant alternative to the tradtional String type offered in most languages.
+In this paper we will discuss the Rope data structure, a data structure intended to serve as a more robust and more performant alternative to the traditional String type offered in most languages.
 The seminal paper regarding Ropes was written by Hans-J. Boehm, Russ Atkinson and Michael Plass in 1995.
 We will provide an overview of their paper, beginning with their justification for Ropes in the first place.
-We will continue with a more technical recap of the implmentation details and running time guarantees of a rope.
-As an exercise we have implemented our own Rope and we will give some rough benchmark estimates comparing various operations.
-Finally, in order to more easily show off the Rope data structure, we will discuss a visualization we created that allows one to actively interact with a Rope data structure and visualize its internal structure.
+We will continue with a more technical exploration of the implementation details and running time guarantees of the various operations that Ropes support.
+Finally, we will conclude with an overview of our contributions. In particular, we have implemented our own Rope in $C++$ and we provide benchmarks that demonstrate its performance. We have also implemented a $D3$\footnote{http://d3js.org/} based visualization which helps demonstrate the internal workings of a rope. We briefly discuss this implementation before we conclude.
 
 \section{Justification for Expanded String Type}
 
-Boehm, Russ and Plass (BRP) begin their paper by discussing some of the faults of traditional string types and the various ways that they could be improved.
-We will provide a brief summary of their points.
+Historically languages like C and Pascal have implemented strings essentially as arrays of characters. Generally this array is of fixed length and basic operations can be implemented in terms of standard array access. Higher level operations are usually provided in the form of library functions: C, for example, provides substring, concatenation and length operations. Many languages implement the string type in the most bare-bones way possible: C, for example, does not even include length alongside the character data.
 
-Before attacking `the traditional string type,' we must first define it.
-This traditional string type we refer to is the crude fixed length arrays of characters offered
-by languages such as C as Pascal.
-We can usually access individual characters via some sort of array access and perform higher level operations such as concatenation or substrings through library functions.
-Such implementations usually do not include any metadata along with the array (such as its length), and are usually mutable.
+Boehm, Russ and Plass (BRP) begin their paper by discussing the problems that follow from this type of approach. They suggest the Rope datastructure and demonstrate that it improves on many of these flaws. We will summarize their ideas here.
 
-BRP list immutable strings as one of the characteristics of a more robust string type, noting that strings are often used to communicate between modules and thus one should be able to operate on a string without risk of modifying the original owner's copy of the string.
+BRP believe that one of the biggest problems with traditional arrays is the fact that they are mutable. Robust system design dictates that we separate our systems into a collection of modules which interact over tightly-guarded interfaces. Unfortunately, for the sake of efficiency strings are often passed through these interfaces by reference. This means that the client of a given module must take care not to accidentally modify a string that it receives lest it incidentally change the internal state of the module. This violates the Principle of Encapsulation. Accordingly, BRP have designed the Rope data structure to efficiently support important operations while remaining immutable: the Rope is a copy-on-write structure.
 
-Additionaly, common string operations should be efficient. This is a natural desire, but BRP  note that particularly string concatenation and substring operations should run fast and not require excessive space.
-
-Perhaps most critically, a more robust string type should be able to scale and handle extremely long strings while remaining performant. BRP mention the original vi editor which was unable to handle large files due to a line length limit, and joke that a "six-month-old child randomly typing at a workstation would routinely crash some older UNIX kernels due to a buffer size limitation."
+In additional to enabling immutability, BRP's Rope design supports efficient concatenation, substring and deletion operations which do not require excessive space overhead. At the time of writing this was particularly relevant because, as BRP joke, "six-month-old child randomly typing at a workstation would routinely crash some older UNIX kernels due to a buffer size limitation." Even editors which are now considered efficient, like vi, used to struggle with long line lengths. By contrast, the Rope structure scales well to handle large strings.
 
 \section{Implementation and Running Time}
 
-In order for string concatenation to run quickly, a desireable implementation should not copy the strings, which naturally suggests storing a string as a tree of smaller literals, which will be what we call our Rope. As defined by BRP, the leaves of this tree will be \textit{flat} strings, the traditional raw character arrays, and internal nodes will represent the concatenation of their children. BRP note that because the leaf notes are immutable, a sequence of concatenation and substring calls could lead to many of these nodes being shared among multiple ropes, implying that the structure is techincally a directed acyclic graph. As they do, we will continue to refer to them as trees as we will be primarily considering only one rope at a time.
+In this section we will discuss the representation of the Rope datastructure as well as the implementaton and running times of various common operations on it.
 
-As a result of tree-storage structure and minor adjustments, we note that the following operations can easily be executed: arbitrary indexing, concatenation, substring and iteration.
-The first three all take logarithmic time through the use of self-balancing trees and the third takes linear time. Though, due to immutability, tree-rebalances are more expensive due to the copying of concatenation nodes. Thus BRP recommended that tree-rebalances are done rarely and only explicitly. To keep the size of the rope from getting out of hand in the meatime, BRP recommedn the follwing approach:
+First, we will develop the representation. As a motivating example, consider the concatenation of two strings. If we want to support immutability naively we might decide to copy both strings into a new buffer. However, this is extremely performance inefficient if the strings are large, and requires making full duplicates of the strings before we have actually modified anything. This suggests that a reasonable approach would be to try to loosely join our target strings together: in particular, we will gradually form a tree structure of joined strings.
+
+More directly: a Rope is a binary tree whose interior nodes are called \emph{concatenation nodes}, since they represent the concatenation of two smaller strings, and whose leaves are \emph{flat} strings which are represented as character arrays. BRP note that because the leaf notes are immutable, a sequence of concatenation and substring calls could lead to many of these nodes being shared among multiple ropes. Technically this would make the Rope a directed acyclic graph rather than a tree, but for the sake of brevity we will refer to the structure as a tree since we will generally be considering only a single rope at a time.
+
+By virtue of this tree structure, alongside a few minor adjustments, our Rope structure is able to efficiently support the following operations, where $n$ is taken to be the length of the string represented by the Rope:
+
+\begin{enumerate}
+\item \emph{charAt(i)}: returns the character stored at index $i$ in time $O(\log(n))$
+\item \emph{concat$(r_1, r_2)$}: returns a new rope structure which contains $r_1$ followed by $r_2$ in time $O(1)$
+\item \emph{substring(i, j)}: returns a new rope structure consisting of the characters between (inclusive) indices $i$ and $j$ in time $O(\log(n)$
+\item \emph{iteration} over each character more efficiently than by repeated charAt calls in time $O(n)$
+\end{enumerate}
+
+These running times all assume a balanced-tree representation. However, BRP argue in the paper that tree-rebalancing operations are very expensive in practice and so should be avoided when possible. In practice, this may cause some of these asymptotic bounds to slip. 
+
+In the following subsections we will describe how each of these operations is implemented.
 
 \subsection{Concatenation}
 
