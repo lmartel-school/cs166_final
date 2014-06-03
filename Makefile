@@ -1,13 +1,16 @@
 COMPILER=clang++
 OPTIONS=-g -Wall
 
-all: clean splay_tree_test
+all: clean test
 
 clean:
-	rm -f *.o splay_tree_test
+	rm -f *.o splay_tree_test rope_test
 
-splay_tree_test: splay_tree.o
-	$(COMPILER) $(OPTIONS) splay_tree.o splay_tree_test.cpp -o splay_tree_test
+test: splay_tree.o rope.o
+	$(COMPILER) $(OPTIONS) splay_tree.o rope.o test.cpp -o test
 
 splay_tree.o:
 	$(COMPILER) $(OPTIONS) -c splay_tree.cpp
+
+rope.o:
+	$(COMPILER) $(OPTIONS) -c rope.cpp

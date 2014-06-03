@@ -14,6 +14,12 @@ TreeNode::TreeNode(TreeNode *parent, int key, std::string *value){
 	this->value = value;
 }
 
+TreeNode::~TreeNode(){
+	if (value != NULL) delete value;
+	if (left != NULL) delete left;
+	if (right != NULL) delete right;
+}
+
 void TreeNode::splay(SplayTree *inTree){
 	/* A root-node should not be splayed. */
 	assert(parent != NULL);
@@ -155,6 +161,10 @@ SplayTree::SplayTree(vector<int> & keys, vector<string *> & values){
 		current->setRight(newNode);
 		current = newNode;
 	}
+}
+
+SplayTree::~SplayTree(){
+	if(root != NULL) delete root;
 }
 
 string *SplayTree::get(int key){
