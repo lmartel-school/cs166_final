@@ -47,9 +47,24 @@ Such implementations usually do not include any metadata along with the array (s
 
 BRP list immutable strings as one of the characteristics of a more robust string type, noting that strings are often used to communicate between modules and thus one should be able to operate on a string without risk of modifying the original owner's copy of the string.
 
+Additionaly, common string operations should be efficient. This is a natural desire, but BRP  note that particularly string concatenation and substring operations should run fast and not require excessive space.
+
+Perhaps most critically, a more robust string type should be able to scale and handle extremely long strings while remaining performant. BRP mention the original vi editor which was unable to handle large files due to a line length limit, and joke that a "six-month-old child randomly typing at a workstation would routinely crash some older UNIX kernels due to a buffer size limitation."
+
 \section{Implementation and Running Time}
 
-Maybe splay trees don't work.
+In order for string concatenation to run quickly, a desireable implementation should not copy the strings, which naturally suggests storing a string as a tree of smaller literals, which will be what we call our Rope. As defined by BRP, the leaves of this tree will be \textit{flat} strings, the traditional raw character arrays, and internal nodes will represent the concatenation of their children. BRP note that because the leaf notes are immutable, a sequence of concatenation and substring calls could lead to many of these nodes being shared among multiple ropes, implying that the structure is techincally a directed acyclic graph. As they do, we will continue to refer to them as trees as we will be primarily considering only one rope at a time.
+
+As a result of tree-storage structure and minor adjustments, we note that the following operations can easily be executed: arbitrary indexing, concatenation, substring and iteration.
+The first three all take logarithmic time through the use of self-balancing trees and the third takes linear time. Though, due to immutability, tree-rebalances are more expensive due to the copying of concatenation nodes. Thus BRP recommended that tree-rebalances are done rarely and only explicitly. To keep the size of the rope from getting out of hand in the meatime, BRP recommedn the follwing approach:
+
+\subsection{Concatenation}
+
+A common use case for strings is continaully concatenation at one end. Thus whenever the right argument is a string literal, we would like to avoid growing the tree excessively. We can do this by accounting for two cases. One, if both arguments are string literals, we will simply combine them into a new string literal. Two, if the left argument is a concatenation node but its right child is a string literal, then we will combine the right child with the right argument to form a new string literal and then return a new concatenation node with the left child. In other cases we simply create a new concatenation node. These two rules make the case of continually appending to the end of a string very efficient.
+
+\subsection{Substring}
+
+When taking substrings 
 
 \section{Benchmarking}
 
