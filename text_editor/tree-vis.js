@@ -1,6 +1,6 @@
 TreeVis = function() {
   var vis = this;
-  this.margin = 30;
+  this.margin = 75;
   this.width = 500;
   this.height = 300;
 
@@ -67,7 +67,7 @@ TreeVis.prototype.update = function(source) {
       links = vis.tree.links(nodes);
 
   // Normalize for fixed-depth.
-  nodes.forEach(function(d) { d.y = d.depth * 180; });
+  nodes.forEach(function(d) { d.y = d.depth * 80; });
 
   // Update the nodes…
   var node = vis.svg.selectAll("g.node")
