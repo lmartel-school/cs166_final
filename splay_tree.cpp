@@ -6,17 +6,15 @@
 typedef SplayTree::TreeNode TreeNode;
 using namespace std;
 
-TreeNode::TreeNode(SplayTree *owner, TreeNode *parent, int key, std::string *value){
+TreeNode::TreeNode(TreeNode *parent, int key, std::string *value){
 	this->parent = parent;
 	this->left = NULL;
 	this->right = NULL;
 	this->key = key;
 	this->value = value;
-
-	this->owner = owner;
 }
 
-void TreeNode::splay(){
+void TreeNode::splay(SplayTree *inTree){
 	/* A root-node should not be splayed. */
 	assert(parent != NULL);
 
@@ -24,29 +22,29 @@ void TreeNode::splay(){
 
 	if (grandParent == NULL) {
 		// zig
-		this->rotate(parent);
+		this->rotate(parent, inTree);
 	}
 	else if ((grandParent->right == parent && parent->left == this)
 		|| (grandParent->left == parent && parent->right == this)) {
 		// zig-zag
-		this->rotate(parent);
-		this->rotate(grandParent);
+		this->rotate(parent, inTree);
+		this->rotate(grandParent, inTree);
 	}
 	else {
 		// zig-zig
-		parent->rotate(grandParent);
-		this->rotate(parent);
+		parent->rotate(grandParent, inTree);
+		this->rotate(parent, inTree);
 	}
 }
 
-void TreeNode::rotate(TreeNode *parentNode) {
+void TreeNode::rotate(TreeNode *parentNode, SplayTree *inTree) {
 	assert(parentNode != NULL);
 	assert(this->parent == parentNode);
 	assert(parentNode->left == this || parentNode->right == this);
 	TreeNode *newParent = parentNode->parent;
 
-	if (parentNode == owner->root) {
-		owner->root = this;
+	if (parentNode == inTree->root) {
+		inTree->root = this;
 	}
 
 	if (parentNode->left == this) {
@@ -142,17 +140,13 @@ SplayTree::SplayTree(vector<int> & keys, vector<string *> & values){
 		return; 
 	}
 
-	root = this->makeNode(NULL, keys[0], values[0]);
+	root = new TreeNode(NULL, keys[0], values[0]);
 	TreeNode *current = root;
 	for (int i = 1; i < keys.size(); i++) {
-		TreeNode *newNode = this->makeNode(current, keys[0], values[i]);
+		TreeNode *newNode = new TreeNode(current, keys[0], values[i]);
 		current->setRight(newNode);
 		current = newNode;
 	}
-}
-
-TreeNode *SplayTree::makeNode(TreeNode *parent, int key, std::string *value){
-	return new TreeNode(this, parent, key, value);
 }
 
 string *SplayTree::get(int key){
@@ -182,7 +176,7 @@ string *SplayTree::get(int key){
 
 void SplayTree::splayToRoot(TreeNode *node){
 	while (root != node) {
-		node->splay();
+		node->splay(this);
 	}
 
 	assert(this->isValidBinaryTree());
