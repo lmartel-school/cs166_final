@@ -13,6 +13,7 @@
 \usepackage{wrapfig}
 \usepackage{units}
 \usepackage{setspace}
+\usepackage{placeins}
 \doublespacing
 
 \setlength{\columnsep}{0.1pc}
@@ -191,14 +192,14 @@ Nevertheless, we saw some promising results when we benchmarked our Rope impleme
 \caption{Here we see the running time of a benchmark that consisted of lookups to random indices in a very large array. As one might guess, the string dominates the rope in this category because the array should be executing in roughly constant time, while the rope will be performing a tree traversal.}
 \end{centering}
 \end{figure}
-
+\FloatBarrier
 \section{Visualization}
 
 The Rope is a somewhat complicated data structure. In order to make it easier to understand the operation of the data structure as the underlying text changes, we have implemented a simple text editor.\footnote{http://andymoreland.com/rope} This visualizer provides an input box where the user is able to perform simple text editing operations, and alongside it has a $D3$ powered visualization of the Rope's underlying data structures. An example visualization is seen in Figure \ref{editor}.
 
 We believe that this visualization immensely clarifies how the Rope structure works: even if the formal description of the structure is unclear, a strong understanding of its operation can be obtained from the visualization very quickly.
 
-The visualization is based off of the $C++$ rope implementation discussed in the previous section. We implement the front-end in javascript and html using $D3$, but we store the text that is input by the user by communicating with a $C++$ program over NaCl. Of course, it would be possible to implement the Rope in javascript itself, but we avoided doing this in an effort to avoid duplication of labor.
+The visualization is based off of the $C++$ rope implementation discussed in the previous section. We implement the front-end in javascript and html using $D3$, but we store the text that is input by the user by communicating over NaCl with a $C++$ program that manages a rope. Of course, it would be possible to implement the Rope in javascript itself, but we avoided doing this in an effort to avoid duplication of labor.
 
 \begin{figure}[t]
 \begin{centering}
@@ -216,7 +217,7 @@ The visualization is based off of the $C++$ rope implementation discussed in the
 
 In this paper we have presented the Rope datastructure as described by Hans-J. Boehm, Russ Atkinson and Michael Plass in 1995. It is an efficient datastructure for immutable operations on large strings. We have demonstrated the core operations and algorithms for this datastructure and shown that they operate efficiently.
 
-In addition, we have contributed a novel implementation of the Rope datastructure based on a splay tree representation. We provide benchmarks that show that the datastructure performs extremely well relative to strings in important cases.
+In addition, we have contributed a novel implementation of the Rope datastructure based on a splay tree representation. We provide benchmarks that show that the datastructure performs roughly as expected in several standard scenarios.
 
 Finally, we have presented our visualization of the rope data structure. We implemented a browser-based visualizer that interacts over NaCl with a Rope in order to power a simple text editor. While the editor is in action, we display the internal tree structure of the rope alongside the user's input area. 
 
