@@ -1,6 +1,9 @@
 #include <string>
 #include <vector>
 
+#ifndef SPLAYTREE_H
+#define SPLAYTREE_H
+
 class SplayTree {
 public:
 
@@ -13,17 +16,18 @@ public:
 
 		int key;
 		std::string *value;
-		
-		void splay(SplayTree *inTree);
 
+		TreeNode(TreeNode *parent, int key, std::string *value);
+		~TreeNode();
+
+		void splay(SplayTree *inTree);
+		void replaceChild(TreeNode *child, TreeNode *newChild);
 		bool isValidBinaryTree();
 		
 	private:
 		friend class SplayTree;
 
-		TreeNode(TreeNode *parent, int key, std::string *value);
 		void rotate(TreeNode *parentNode, SplayTree *inTree);
-		void replaceChild(TreeNode *child, TreeNode *newChild);
 		TreeNode *getGrandParent();
 		void setLeft(TreeNode *left);
 		void setRight(TreeNode *right);
@@ -35,6 +39,7 @@ public:
 	SplayTree();
 	SplayTree(TreeNode *root);
 	SplayTree(std::vector<int> & keys, std::vector<std::string *> & values);
+	~SplayTree();
 
 	// void insert(int key, std::string value);
 	std::string *get(int key);
@@ -46,3 +51,5 @@ private:
 	void splayToRoot(TreeNode *node);
 
 };
+
+#endif
