@@ -62,9 +62,11 @@ By virtue of this tree structure, alongside a few minor adjustments, our Rope st
 
 These running times all assume a balanced-tree representation. However, BRP argue in the paper that tree-rebalancing operations are very expensive in practice and so should be avoided when possible. In practice, this may cause some of these asymptotic bounds to slip. 
 
-In the following subsections we will describe how each of these operations is implemented.
+In the following subsections we will describe how each of these operations are implemented and analyze their running time bounds.
 
 \subsection{Concatenation}
+
+Concatenation is one of the most important operations for a Rope. Generally, concatenating two ropes together is simply a matter of creating a new Concatenation Node and setting the left and right children of it to be the two Ropes to be concatenated. This is trivially a constant time operation. However, BRP suggest a few optimizations to this operation.
 
 A common use case for strings is continaully concatenation at one end. Thus whenever the right argument is a string literal, we would like to avoid growing the tree excessively. We can do this by accounting for two cases. One, if both arguments are string literals, we will simply combine them into a new string literal. Two, if the left argument is a concatenation node but its right child is a string literal, then we will combine the right child with the right argument to form a new string literal and then return a new concatenation node with the left child. In other cases we simply create a new concatenation node. These two rules make the case of continually appending to the end of a string very efficient.
 
@@ -80,11 +82,20 @@ We wrote some code.
 
 In order to better visualize how a rope structure may be built up, we set out to write a simple text editor whose backing store is a Rope. Text editors are one of the more commonly cited uses for Ropes, so it seemed fitting. Accompanying the editor is a tree structure displaying the current state of the rope's internal representation.
 
+
+
+\begin{figure}[h]
+\begin{centering}
 \includegraphics[scale=0.25]{editorImage1}
+\caption{This figure demonstrates the visualization that we implemented in order to display a Rope's internal structure. On the left the user is able to enter a string and on the right we see the state of the Rope's internals after adjustment.}
+
+\end{centering}
+\end{figure}
 
 In building this simple demo, we began to consider some of the limitations of Ropes. While the immutability requirement may grant certain safety benefits, one could argue that it in a sense causes more trouble than it is worth. Consider a case where a large file has been build up via a series of sequential inserts at the end of the string. Then, when a character in the middle of the string is deleted. In the traditional implementation this first delete would require new concatenation nodes to be constructed all the way along the path from the root of the tree to node containing the edited string. Each subsequent insertion or deletion would continue to create a lot of work, including potentially memory allocations. In a text editor one often does a lot of local edits. It would be nice if a so-called `working-set' were located near the root of the tree. (We will ignore the fact that the bottleneck in most text editors these days is not the actual text manipulation but the neurons of the typist. We can still continue the exercise.)
 
 One could use a splay tree for the this purpose, but then one completely forfeits some of the subtler niceties afforded by the immutability principle. For example, one could easily implmement an undo stack (very useful in a text editor!) by simply maintaining a list to previous representations of the file's string. Out of curiosity, we will forget this feature and continue to see what alterations we can apply. Suppose that in addition to having a completely mutable tree, we also had mutable string buffers. Then a series of local edits would splay a node up to the root, and as long as the buffer was moderately full every insert/delete would only take time proportional to the size of the buffer. This unfortunate fact means that this approach is unlikely to lead to any asymptotically better algorithms. We can see this by assuming that we have a block size of $b$. Though this hasn't been mentioned, supose we could somehow force each buffer to be at least half full. This would guarantee $\Theta(n/b)$ nodes in our tree, so splaying would take $O(\log n/b)$, but every individual operation at a node would also take $O(b)$ for a total time of $O(\log n/b) + O(b) = O(\log n) - O(\log b) + O(b) = O(\log n) + O(\log )$, which is nothing special. As long as $b$ on the order of $\log n$, then we won't lose any ground. Perhaps such a structure would be faster in practice due to the fewer allocations. As mentioned, insertions and deletions from the middle could force $O(\log n)$ new nodes per operation in the immutable rope, where as in this its $O(1 / \log n)$ allocations per insertion or deletion because you only would need a new node wheneve you add $\log n$ new characters! This is certainly better and likely indicates significant performace benefits.
+
 
 
 \end{document}
