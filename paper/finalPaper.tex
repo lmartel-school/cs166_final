@@ -136,7 +136,27 @@ This is also an efficient implementation of the operation. Since our in-order tr
 
 \section{Implementation and Benchmarking}
 
-We wrote some code.
+We implemented our Rope on top of a Splay Tree, beginning with a C++ Splay Tree based on the Java version we created for an earlier problem set. 
+
+Our finished Rope supports the following operations:
+\begin{itemize}
+\item $rope.charAt(index)$
+\item $rope.substr(start\_index, end\_index)$
+\item $rope.split(index)$ (creates two ropes)
+\item $rope.concat(right\_rope)$
+\item $rope.insert(start\_index, string\_to\_insert)$
+\item $rope.delete(start\_index, end\_index)$
+\end{itemize}
+
+We implemented charAt using the relatively straightforward tree lookup described in Section $3.3$. After looking up a leaf node, we splay its parent to help rebalance the tree. An important (and tricky) aspect of Ropes is that leaves have different properties than internal nodes (only leaves contain strings), so they must stay leaves. We therefore can't splay a leaf without destroying our structure; splaying its parent, however, keeps all leaves in their proper positions but still gets our chosen node close to the root and helps balance the tree.
+
+Implementing $substr$ was complicated; we ended up opting for finding the lowest common ancestor of the start and end nodes, and then doing an in-order traversal rooted at that ancestor while filtering out nodes outside our range. At the end, we splay this common ancestor node in order to get all the nodes in the found range closer to the root of the tree.
+
+Split and join 
+
+Insert and delete were quick to implement given the other operations; an insert is equivalent to split-join-join, and a delete can be implemented as split-split-join.
+
+
 
 \section{Visualization}
 
