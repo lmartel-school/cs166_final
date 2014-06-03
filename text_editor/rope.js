@@ -20,7 +20,7 @@ Rope.prototype.toJSON = function() {
 
 function splitString(str) {
   if (str.length <= 3) {
-    return {"name":str};
+    return {"name":str.replace(/\n/, '\\n')};
   }
   var split = str.length / 2;
   return {"name" : "Weight: " + str.length,
