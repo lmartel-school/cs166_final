@@ -152,11 +152,45 @@ We implemented charAt using the relatively straightforward tree lookup described
 
 Implementing $substr$ was complicated; we ended up opting for finding the lowest common ancestor of the start and end nodes, and then doing an in-order traversal rooted at that ancestor while filtering out nodes outside our range. At the end, we splay this common ancestor node in order to get all the nodes in the found range closer to the root of the tree.
 
-Split and join 
+Concatenation was easy to implement; we simply create a new root node and set the two old ropes as its children. Splitting is trickier: we first detect whether the requested split index is in the middle of a node, or between two nodes. We transform the former case into the latter case by splitting the problematic leaf node into a new internal node and two leaves. We then traverse up the tree, severing and collecting right children and readjusting weights. We concatenate together the severed child nodes to get the new right-hand tree; the new left-hand tree is what remains of our original tree.
 
 Insert and delete were quick to implement given the other operations; an insert is equivalent to split-join-join, and a delete can be implemented as split-split-join.
 
+One notable downside of our Rope is that we used recursion in several places to simplify the implementation; this can lead to stack space issues once the number of characters in our string reaches the tens of millions. This issue could be fixed by reimplementing the recursive operations in their much more complicated iterative forms.
 
+Nevertheless, we saw some promising results when we benchmarked our Rope implementation against the native C++ string object.
+\newpage
+\subsection{Benchmarks}
+
+\begin{figure}[p]
+\begin{centering}
+\includegraphics[scale=1.0]{prepends_vs_execution}
+\caption{This graph demonstrates the running time of a benchmark that consisted of many small repeated prepend operations. We see that the rope performs significantly better than the string: the rope should support this operation very quickly, while we'd expect the C++ string to have to move everything right in order to make space at the front. Unfortunately our C++ String benchmark never terminated for the last few trials, so we have ommitted these data points. We allowed the benchmarks to run for much longer than the rope.}
+
+\end{centering}
+\end{figure}
+
+\begin{figure}[p]
+\begin{centering}
+\includegraphics[scale=1.0]{append_vs_execution}
+\caption{This graph demonstrates the running time of a benchmark that consisted of many small repeated append operations. Interestingly, the string performs significantly better than the rope. We suspect that the C++ implementation has optimized strings for the append operation: we suspect that we would see different behavior if string append were implemented naively. Also, we see that the rope performs approximately the same as it did for the prepend operation. This implies that it is agnostic to the end at which the string is inserted.}
+
+\end{centering}
+\end{figure}
+
+\begin{figure}[p]
+\begin{centering}
+\includegraphics[scale=1.0]{substring_vs_execution}
+\caption{Here we see the running time of a benchmark that consisted of extracting varying sized substrings from a large string. The string appears to dominate the substring as the size increases: the string implementation is much simpler than the rope implementation so this is not surprising.}
+\end{centering}
+\end{figure}
+
+\begin{figure}[p]
+\begin{centering}
+\includegraphics[scale=1.0]{size_vs_lookup}
+\caption{Here we see the running time of a benchmark that consisted of lookups to random indices in a very large array. As one might guess, the string dominates the rope in this category because the array should be executing in roughly constant time, while the rope will be performing a tree traversal.}
+\end{centering}
+\end{figure}
 
 \section{Visualization}
 
