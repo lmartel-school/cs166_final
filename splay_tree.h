@@ -22,16 +22,20 @@ public:
 
 		void splay(SplayTree *inTree);
 		void replaceChild(TreeNode *child, TreeNode *newChild);
+
 		bool isValidBinaryTree();
+		void toString(int indentationLevel, std::string & builder);
+		std::string toString();
+
+		void setLeft(TreeNode *left);
+		void setRight(TreeNode *right);
+		void setParent(TreeNode *parent);
 		
 	private:
 		friend class SplayTree;
 
 		void rotate(TreeNode *parentNode, SplayTree *inTree);
 		TreeNode *getGrandParent();
-		void setLeft(TreeNode *left);
-		void setRight(TreeNode *right);
-		void setParent(TreeNode *parent);
 	};
 
 	TreeNode *root;
@@ -46,6 +50,7 @@ public:
 	// void remove(int key);
 
 	bool isValidBinaryTree();
+	std::string toString();
 	
 private:
 	void splayToRoot(TreeNode *node);

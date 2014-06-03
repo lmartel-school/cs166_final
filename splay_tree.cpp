@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <vector>
 #include <string>
+#include <iostream>
 
 typedef SplayTree::TreeNode TreeNode;
 using namespace std;
@@ -22,32 +23,45 @@ TreeNode::~TreeNode(){
 
 void TreeNode::splay(SplayTree *inTree){
 	/* A root-node should not be splayed. */
-	assert(parent != NULL);
+	// assert(parent != NULL);
+	if (parent == NULL) return;
 
 	TreeNode *grandParent = this->getGrandParent();
 
 	if (grandParent == NULL) {
 		// zig
+		// parent->key -= key;
+
+		// cout << "will zig:" << parent->toString() << endl;
+
 		this->rotate(parent, inTree);
 
-		parent->key -= this->key;
+		// cout << "did rotate:" << this->toString() << endl;
 	}
 	else if ((grandParent->right == parent && parent->left == this)
 		|| (grandParent->left == parent && parent->right == this)) {
 		// zig-zag
+		// grandParent->key -= (this->key + parent->key);
+		// this->key += parent->key;
+
+		// cout << "will zigzag:" << grandParent->toString() << endl;
+
 		this->rotate(parent, inTree);
 		this->rotate(grandParent, inTree);
 
-		grandParent->key -= (this->key + parent->key);
-		this->key += parent->key;
+		// cout << "did rotate:" << this->toString() << endl;
 	}
 	else {
 		// zig-zig
+		// parent->key -= this->key;
+		// grandParent->key -= (this->key + parent->key);
+
+		// cout << "will zigzig:" << grandParent->toString() << endl;
+
 		parent->rotate(grandParent, inTree);
 		this->rotate(parent, inTree);
 
-		parent->key -= this->key;
-		grandParent->key -= (this->key + parent->key);
+		// cout << "did rotate:" << this->toString() << endl;
 	}
 }
 
@@ -71,6 +85,8 @@ void TreeNode::rotate(TreeNode *parentNode, SplayTree *inTree) {
 		}
 		parentNode->setLeft(this->right);
 		this->setRight(parentNode);
+
+		parentNode->key -= this->key;
 	}
 	else {
 		/* We're doing a left-rotation */
@@ -82,6 +98,8 @@ void TreeNode::rotate(TreeNode *parentNode, SplayTree *inTree) {
 		}
 		parentNode->setRight(this->left);
 		this->setLeft(parentNode);
+
+		this->key += parentNode->key;
 	}
 }
 
@@ -135,6 +153,37 @@ bool TreeNode::isValidBinaryTree() {
 	}
 
 	return valid;
+}
+
+void indent(int indentationLevel, string & builder) {
+	for (int i = 0; i < indentationLevel; i++) {
+		builder.append("\t");
+	}
+}
+
+void TreeNode::toString(int indentationLevel, string & builder){
+	builder.append(to_string(key) + " --");
+	if (value != NULL) builder.append(*value);
+	builder.append("\n");
+	indentationLevel++;
+	if (left != NULL) {
+		indent(indentationLevel, builder);
+		builder.append("left: ");
+		left->toString(indentationLevel, builder);
+	}
+
+	if (right != NULL) {
+		indent(indentationLevel, builder);
+		builder.append("right: ");
+		right->toString(indentationLevel, builder);
+	}
+}
+
+string TreeNode::toString(){
+	string builder = "<Splay Tree>:\nroot: ";
+	toString(0, builder);
+
+	return builder;
 }
 
 
@@ -204,4 +253,8 @@ bool SplayTree::isValidBinaryTree(){
 	if (root == NULL) return true;
 	assert(root->parent == NULL);
 	return root->isValidBinaryTree();
+}
+
+string SplayTree::toString(){
+	return (root != NULL) ? root->toString() : "[root null]";
 }

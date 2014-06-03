@@ -1,26 +1,1 @@
-#include <iostream>
-#include <algorithm>
-#include <array>
-#include <random>
-#include <chrono>
-#include <assert.h>
-#include "splay_tree.h"
-
-using namespace std;
-
-int main (int argc, char *argv[]) {
-	for (int size = 0; size <= 150; size++) {
-		cout << "Testing size " << size << endl;
-		vector<int> keys;
-		vector<string *> values;
-		for (int i = 0; i < size; i++){
-			keys.push_back(i);
-			values.push_back(new string(""));
-		}
-
-		// unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-		random_shuffle(keys.begin(), keys.end());// , default_random_engine(seed));
-
-		assert((new SplayTree(keys, values))->isValidBinaryTree());
-	}
-}
+#include <iostream>#include <algorithm>#include <array>#include <random>#include <chrono>#include <assert.h>#include "splay_tree.h"#include "rope.h"using namespace std;void testSplayTree(){	for (int size = 0; size <= 150; size++) {		cout << "Testing size " << size << endl;		vector<int> keys;		vector<string *> values;		for (int i = 0; i < size; i++){			keys.push_back(i);			values.push_back(new string(""));		}		// unsigned seed = chrono::system_clock::now().time_since_epoch().count();		random_shuffle(keys.begin(), keys.end());// , default_random_engine(seed));		assert((new SplayTree(keys, values))->isValidBinaryTree());	}}string *s(string & str){	return new string(str);}string *s(const char str[]){	return new string(str);}int main (int argc, char *argv[]) {	// testSplayTree();	Rope *rope = new Rope();	rope = rope->insert(0, s("PLEASE WORK"));	// cout << rope->toString() << endl;	assert(rope->at(2) == 'E');	// cout << "found:" << rope->report(0, 3) << endl;	assert(rope->report(0, 3) == "PLE");	rope = rope->remove(4, 9);	// cout << "update:" << rope->toString() << endl;	assert(rope->report(0, 5) == "PLEAK");	// cout << "update:" << rope->toString() << endl;	rope = rope->insert(4, s("WOR"));	rope = rope->insert(4, s("SE "));	rope = rope->insert(rope->length(), s(", BITCH"));	// cout << "update:" << rope->toString() << endl;	assert(rope->report(0, rope->length()) == "PLEASE WORK, BITCH");	cout << "All tests passed." << endl;}
