@@ -62,30 +62,30 @@ Rope *Rope::concat(Rope *right){
   if (leftRoot == NULL) return right;
   if (rightRoot == NULL) return left;
   
-  //cout << "###MERGING###" << endl;
-  //cout << left->toString() << endl;
-  //cout << right->toString() << endl;
+  // cout << "###MERGING###" << endl;
+  // cout << left->toString() << endl;
+  // cout << right->toString() << endl;
 
   // Option 1
   TreeNode *newRoot;
   if (leftRoot->isLeaf() && rightRoot->isLeaf()){
-	  //cout << "case 1" << endl;
+	  // cout << "case 1" << endl;
 	  string newStr = *(leftRoot->value) + (*(rightRoot->value));
 	  newRoot = new TreeNode(NULL, newStr.length(), new string(newStr));
   } else if (rightRoot->isLeaf() && leftRoot->right != NULL && leftRoot->right->isLeaf()){
-	  //cout << "case 2" << endl;
+	  // cout << "case 2" << endl;
 	  string newStr = *(leftRoot->right->value) + (*(rightRoot->value));
 	  Rope *newLeft = new Rope(this->shouldSplay, new SplayTree(leftRoot->left));
 	  Rope *newRight = new Rope(this->shouldSplay, new SplayTree(new TreeNode(NULL, newStr.length(), new string(newStr))));
 	  return newLeft->concat(newRight);
   } else if (leftRoot->isLeaf() && rightRoot->left != NULL && rightRoot->left->isLeaf()){
-	  //cout << "case 3" << endl;
+	  // cout << "case 3" << endl;
 	  string newStr = *(leftRoot->value) + (*(rightRoot->left->value));
 	  Rope *newLeft = new Rope(this->shouldSplay, new SplayTree(new TreeNode(NULL, newStr.length(), new string(newStr))));
 	  Rope *newRight = new Rope(this->shouldSplay, new SplayTree(rightRoot->right));
 	  return newLeft->concat(newRight);
   } else {
-	  //cout << "case 4" << endl;
+	  // cout << "case 4" << endl;
 	  newRoot = new TreeNode(NULL, left->length(), NULL);
 	  newRoot->setLeft(left->tree->root);
 	  newRoot->setRight(right->tree->root);
@@ -121,6 +121,7 @@ Rope *Rope::concat(Rope *right){
 }
 
 pair<Rope *, Rope *> Rope::split(int index){
+  // cout << "SPLITTING" << endl;
   if (tree->root == NULL) return make_pair(new Rope(this->shouldSplay, new SplayTree(NULL)), new Rope(this->shouldSplay, new SplayTree(NULL)));
   if (index < 0) return make_pair(new Rope(this->shouldSplay, new SplayTree(NULL)), this);
   int localIndex;
@@ -162,8 +163,10 @@ pair<Rope *, Rope *> Rope::split(int index){
     if (toSlice != NULL){
       up->right = NULL;
       toSlice->parent = NULL;
-      slicedRoots.push(new Rope(this->shouldSplay, new SplayTree(toSlice)));
-      weightSliced += sumWeightsDownRightSpine(toSlice);
+      if(!toSlice->isLeaf() || toSlice->key > 0){
+        slicedRoots.push(new Rope(this->shouldSplay, new SplayTree(toSlice)));
+        weightSliced += sumWeightsDownRightSpine(toSlice);
+      }
     }
 
     cur = up;
@@ -199,7 +202,7 @@ Rope *Rope::remove(int start, int end){
   pair<Rope *, Rope *> pieces = this->split(end - 1);
   Rope *after = pieces.second;
   pieces = pieces.first->split(start - 1);
-  // cout << pieces.first->toString() << pieces.second->toString() << endl;
+  // cout << pieces.first->toString() << after->toString() << endl;
   // delete pieces.second;
   return pieces.first->concat(after);
 }
