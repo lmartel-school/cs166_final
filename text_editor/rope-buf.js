@@ -1,6 +1,7 @@
-RopeBuf = function(bufSize) {
+RopeBuf = function(bufSize, splay) {
   this.bufSize = bufSize;
   this.root = new Node("");
+  this.shouldSplay = splay;
 };
 
 RopeBuf.prototype.insert = function(pos, ch, vis) {
@@ -59,6 +60,7 @@ RopeBuf.prototype.insert = function(pos, ch, vis) {
     // Final case, character must go in current node. If we can't we fit it
     // in, then we break it into two pieces.
     } else {
+      pos -= node.leftSize;
       var fullStr = node.str.substring(0, pos) + ch + node.str.substring(pos);
       // There is room
       if (node.str.length < this.bufSize) {
@@ -92,19 +94,114 @@ RopeBuf.prototype.insert = function(pos, ch, vis) {
   if (!done) {
     // We've got to a point where we want to insert where there isn't anything.
     var newNode = new Node("" + ch);
+    newNode.parent = parent;
     if (dir == "left") {
       parent.left = newNode;
     } else {
       parent.right = newNode;
     }
+    node = newNode;
   }
+
+  if (this.shouldSplay) this.splay(node);
 
   vis.redraw(this.toJSON());
 };
 
 RopeBuf.prototype.remove = function(pos, vis) {
-  common.naclModule.postMessage('r' + pos + ' ' + (pos + 1));
-  common.naclModule.callback = fn;
+  var dir;
+  var node = this.root;
+
+  while (true) {
+    // Character is in left side
+    if (pos < node.leftSize) {
+      node.leftSize--;
+      node = node.left;
+      dir = "left";
+
+    // Character is in right wide
+    } else if (pos >= node.leftSize + node.str.length) {
+      pos -= node.leftSize + node.str.length;
+      node = node.right;
+      dir = "right";
+
+    // Character is in this node
+    } else {
+      pos -= node.leftSize;
+      node.str = node.str.substring(0, pos) + node.str.substring(pos + 1);
+      break;
+    }
+  }
+
+  if (this.shouldSplay) this.splay(node);
+
+  if (node.str.length == 0) this.removeNode(node, dir);
+
+  vis.redraw(this.toJSON());
+};
+
+RopeBuf.prototype.removeNode = function(node, dir) {
+  // Special case don't delete root when it's all that's left
+  if (node == this.root && node.left == null && node.right == null) return;
+
+  // Node has no children, set parent to null
+  if (node.left == null && node.right == null) {
+    if (dir == "left") node.parent.left = null;
+    else node.parent.right = null;
+
+  // If one child is null we can replace with non-null child
+  } else if (node.left == null) {
+    if (node == this.root) {
+      this.root = node.right;
+    } else {
+      if (dir == "left") {
+        parent.left = node.right;
+      } else {
+        parent.right = node.right;
+      }
+    }
+    node.right.parent = node.parent;
+  } else if (node.right == null) {
+    if (node == this.root) {
+      this.root = node.left;
+    } else {
+      if (dir == "left") {
+        parent.left = node.left;
+      } else {
+        parent.right = node.left;
+      }
+    }
+    node.left.parent = node.parent;
+
+  // Otherwise both children exist. We'll take the rightmost node of the
+  // left child and bring it up to replace us. (That way we have fewer
+  // leftSizes to update.
+  } else {
+    var predecessor = node.left;
+    while (predecessor.right != null) predecessor = predecessor.right;
+
+    this.removeNode(predecessor, "left");
+
+    // Set up predecessor's size.
+    predecessor.leftSize = node.leftSize - predecessor.str.length;
+
+    // Set up predecessor's children.
+    predecessor.right = node.right;
+    node.right.parent = predecessor;
+    predecessor.left = node.left;
+    if (node.left != null) node.left.parent = predecessor;
+
+    // Now let node's parent know.
+    if (node == this.root) {
+      this.root = predecessor;
+    } else {
+      if (dir == "left") {
+        node.parent.left = predecessor;
+      } else {
+        node.parent.right = predecessor;
+      }
+    }
+  }
 };
 
 RopeBuf.prototype.string = function() {
@@ -140,3 +237,56 @@ nodeToJSON = function(node) {
   if (children.length > 0) json["children"] = children;
   return json;
 };
+
+RopeBuf.prototype.splay = function(node) {
+  while (node.parent != null) {
+    /* ZIG CASE */
+    if (node.parent.parent == null) {
+      this.rotate(node);
+    } else {
+      var parent = node.parent;
+      /* ZIG-ZIG CASE */
+      if (   (node == parent.left  && parent == parent.parent.left )
+          || (node == parent.right && parent == parent.parent.right)) {
+        this.rotate(parent);
+        this.rotate(node);
+      } else {
+      /* ZIG-ZAG CASE */
+        this.rotate(node);
+        this.rotate(node);
+      }
+    }
+  }
+  this.root = node;
+};
+
+RopeBuf.prototype.rotate = function(child) {
+  var parent = child.parent;
+  if (child == parent.left) {
+    parent.left = child.right;
+    /* Fix that child's parent if we can. */
+    if (child.right != null) {
+      child.right.parent = parent;
+    }
+    child.right = parent;
+  } else {
+    parent.right = child.left;
+    /* Fix that child's parent if we can. */
+    if (child.left != null) {
+      child.left.parent = parent;
+    }
+    child.left = parent;
+  }
+
+  child.parent = parent.parent;
+  parent.parent = child;
+
+  /* Adjust original grandparent (new parent) */
+  if (child.parent != null) {
+    if (child.parent.left == parent) {
+      child.parent.left = child;
+    } else {
+      child.parent.right = child;
+    }
+  }
+}

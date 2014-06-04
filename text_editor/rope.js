@@ -13,7 +13,7 @@ Rope.prototype.insert = function(pos, ch, vis) {
 
 Rope.prototype.remove = function(pos, vis) {
   common.naclModule.postMessage('r' + pos + ' ' + (pos + 1));
-  var t = this;
+  var r = this;
   common.naclModule.callback = function(ignored) {
     r.toJSON(function(objStr) {
       vis.redraw(JSON.parse(objStr));
