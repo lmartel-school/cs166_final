@@ -13,6 +13,7 @@
 \usepackage{wrapfig}
 \usepackage{units}
 \usepackage{setspace}
+\usepackage{placeins}
 \doublespacing
 
 \setlength{\columnsep}{0.1pc}
@@ -136,17 +137,75 @@ This is also an efficient implementation of the operation. Since our in-order tr
 
 \section{Implementation and Benchmarking}
 
-We wrote some code.
+We implemented our Rope on top of a Splay Tree, beginning with a C++ Splay Tree based on the Java version we created for an earlier problem set. 
 
+Our finished Rope supports the following operations:
+\begin{itemize}
+\item $rope.charAt(index)$
+\item $rope.substr(start\_index, end\_index)$
+\item $rope.split(index)$ (creates two ropes)
+\item $rope.concat(right\_rope)$
+\item $rope.insert(start\_index, string\_to\_insert)$
+\item $rope.delete(start\_index, end\_index)$
+\end{itemize}
+
+We implemented charAt using the relatively straightforward tree lookup described in Section $3.3$. After looking up a leaf node, we splay its parent to help rebalance the tree. An important (and tricky) aspect of Ropes is that leaves have different properties than internal nodes (only leaves contain strings), so they must stay leaves. We therefore can't splay a leaf without destroying our structure; splaying its parent, however, keeps all leaves in their proper positions but still gets our chosen node close to the root and helps balance the tree.
+
+Implementing $substr$ was complicated; we ended up opting for finding the lowest common ancestor of the start and end nodes, and then doing an in-order traversal rooted at that ancestor while filtering out nodes outside our range. At the end, we splay this common ancestor node in order to get all the nodes in the found range closer to the root of the tree.
+
+Concatenation was easy to implement; we simply create a new root node and set the two old ropes as its children. Splitting is trickier: we first detect whether the requested split index is in the middle of a node, or between two nodes. We transform the former case into the latter case by splitting the problematic leaf node into a new internal node and two leaves. We then traverse up the tree, severing and collecting right children and readjusting weights. We concatenate together the severed child nodes to get the new right-hand tree; the new left-hand tree is what remains of our original tree.
+
+Insert and delete were quick to implement given the other operations; an insert is equivalent to split-join-join, and a delete can be implemented as split-split-join.
+
+One notable downside of our Rope is that we used recursion in several places to simplify the implementation; this can lead to stack space issues once the number of characters in our string reaches the tens of millions. This issue could be fixed by reimplementing the recursive operations in their much more complicated iterative forms.
+
+Nevertheless, we saw some promising results when we benchmarked our Rope implementation against the native C++ string object.
+\subsection{Benchmarks}
+(Figures begin on next page)
+
+\begin{figure}[p]
+\begin{centering}
+\includegraphics[scale=1.0]{prepends_vs_execution}
+\caption{This graph demonstrates the running time of a benchmark that consisted of many small repeated prepend operations. We see that the rope performs significantly better than the string: the rope should support this operation very quickly, while we'd expect the C++ string to have to move everything right in order to make space at the front. Unfortunately our C++ String benchmark never terminated for the last few trials, so we have ommitted these data points. We allowed the benchmarks to run for much longer than the rope.}
+
+\end{centering}
+\end{figure}
+
+\begin{figure}[p]
+\begin{centering}
+\includegraphics[scale=1.0]{append_vs_execution}
+\caption{This graph demonstrates the running time of a benchmark that consisted of many small repeated append operations. Interestingly, the string performs significantly better than the rope. We suspect that the C++ implementation has optimized strings for the append operation: we suspect that we would see different behavior if string append were implemented naively. Also, we see that the rope performs approximately the same as it did for the prepend operation. This implies that it is agnostic to the end at which the string is inserted.}
+
+\end{centering}
+\end{figure}
+
+\begin{figure}[p]
+\begin{centering}
+\includegraphics[scale=1.0]{substring_vs_execution}
+\caption{Here we see the running time of a benchmark that consisted of extracting varying sized substrings from a large string. The string appears to dominate the substring as the size increases: the string implementation is much simpler than the rope implementation so this is not surprising.}
+\end{centering}
+\end{figure}
+
+\begin{figure}[p]
+\begin{centering}
+\includegraphics[scale=1.0]{size_vs_lookup}
+\caption{Here we see the running time of a benchmark that consisted of lookups to random indices in a very large array. As one might guess, the string dominates the rope in this category because the array should be executing in roughly constant time, while the rope will be performing a tree traversal.}
+\end{centering}
+\end{figure}
+\FloatBarrier
 \section{Visualization}
 
-The Rope is a somewhat complicated data structure. In order to make it easier to understand the operation of the data structure as the underlying text changes, we have implemented a simple text editor.\footnote{http://andymoreland.com/rope} This visualizer provides an input box where the user is able to perform simple text editing operations, and alongside it has a $D3$ powered visualization of the Rope's underlying data structures. An example visualization is seen in Figure \ref{editor}.
+The Rope is a somewhat complicated data structure. In order to make it easier to understand the operation of the data structure as the underlying text changes, we have implemented a simple text editor. This visualizer provides an input box where the user is able to perform simple text editing operations, and alongside it has a $D3$ powered visualization of the Rope's underlying data structures. An example visualization is seen in Figure \ref{editor}.
 
 We believe that this visualization immensely clarifies how the Rope structure works: even if the formal description of the structure is unclear, a strong understanding of its operation can be obtained from the visualization very quickly.
 
-The visualization is based off of the $C++$ rope implementation discussed in the previous section. We implement the front-end in javascript and html using $D3$, but we store the text that is input by the user by communicating with a $C++$ program over NaCl. Of course, it would be possible to implement the Rope in javascript itself, but we avoided doing this in an effort to avoid duplication of labor.
+The visualization is based off of the $C++$ rope implementation discussed in the previous section. We implement the front-end in javascript and html using $D3$, but we store the text that is input by the user by communicating over NaCl with a $C++$ program that manages a rope. Of course, it would be possible to implement the Rope in javascript itself, but we avoided doing this in an effort to avoid duplication of labor.
 
-\begin{figure}[t]
+%% In building this simple demo, we began to consider some of the limitations of Ropes. While the immutability requirement may grant certain safety benefits, one could argue that it in a sense causes more trouble than it is worth. Consider a case where a large file has been build up via a series of sequential inserts at the end of the string. Then, when a character in the middle of the string is deleted. In the traditional implementation this first delete would require new concatenation nodes to be constructed all the way along the path from the root of the tree to node containing the edited string. Each subsequent insertion or deletion would continue to create a lot of work, including potentially memory allocations. In a text editor one often does a lot of local edits. It would be nice if a so-called `working-set' were located near the root of the tree. (We will ignore the fact that the bottleneck in most text editors these days is not the actual text manipulation but the neurons of the typist. We can still continue the exercise.)
+
+%% One could use a splay tree for the this purpose, but then one completely forfeits some of the subtler niceties afforded by the immutability principle. For example, one could easily implmement an undo stack (very useful in a text editor!) by simply maintaining a list to previous representations of the file's string. Out of curiosity, we will forget this feature and continue to see what alterations we can apply. Suppose that in addition to having a completely mutable tree, we also had mutable string buffers. Then a series of local edits would splay a node up to the root, and as long as the buffer was moderately full every insert/delete would only take time proportional to the size of the buffer. This unfortunate fact means that this approach is unlikely to lead to any asymptotically better algorithms. We can see this by assuming that we have a block size of $b$. Though this hasn't been mentioned, supose we could somehow force each buffer to be at least half full. This would guarantee $\Theta(n/b)$ nodes in our tree, so splaying would take $O(\log n/b)$, but every individual operation at a node would also take $O(b)$ for a total time of $O(\log n/b) + O(b) = O(\log n) - O(\log b) + O(b) = O(\log n) + O(\log )$, which is nothing special. As long as $b$ on the order of $\log n$, then we won't lose any ground. Perhaps such a structure would be faster in practice due to the fewer allocations. As mentioned, insertions and deletions from the middle could force $O(\log n)$ new nodes per operation in the immutable rope, where as in this its $O(1 / \log n)$ allocations per insertion or deletion because you only would need a new node wheneve you add $\log n$ new characters! This is certainly better and likely indicates significant performace benefits.
+
+\begin{figure}[h]
 \begin{centering}
 \includegraphics[scale=0.35]{editorImage1}
 \caption{This figure demonstrates the visualization that we implemented in order to display a Rope's internal structure. On the left the user is able to enter a string and on the right we see the state of the Rope's internals after adjustment.}\label{editor}
@@ -154,15 +213,11 @@ The visualization is based off of the $C++$ rope implementation discussed in the
 \end{centering}
 \end{figure}
 
-%% In building this simple demo, we began to consider some of the limitations of Ropes. While the immutability requirement may grant certain safety benefits, one could argue that it in a sense causes more trouble than it is worth. Consider a case where a large file has been build up via a series of sequential inserts at the end of the string. Then, when a character in the middle of the string is deleted. In the traditional implementation this first delete would require new concatenation nodes to be constructed all the way along the path from the root of the tree to node containing the edited string. Each subsequent insertion or deletion would continue to create a lot of work, including potentially memory allocations. In a text editor one often does a lot of local edits. It would be nice if a so-called `working-set' were located near the root of the tree. (We will ignore the fact that the bottleneck in most text editors these days is not the actual text manipulation but the neurons of the typist. We can still continue the exercise.)
-
-%% One could use a splay tree for the this purpose, but then one completely forfeits some of the subtler niceties afforded by the immutability principle. For example, one could easily implmement an undo stack (very useful in a text editor!) by simply maintaining a list to previous representations of the file's string. Out of curiosity, we will forget this feature and continue to see what alterations we can apply. Suppose that in addition to having a completely mutable tree, we also had mutable string buffers. Then a series of local edits would splay a node up to the root, and as long as the buffer was moderately full every insert/delete would only take time proportional to the size of the buffer. This unfortunate fact means that this approach is unlikely to lead to any asymptotically better algorithms. We can see this by assuming that we have a block size of $b$. Though this hasn't been mentioned, supose we could somehow force each buffer to be at least half full. This would guarantee $\Theta(n/b)$ nodes in our tree, so splaying would take $O(\log n/b)$, but every individual operation at a node would also take $O(b)$ for a total time of $O(\log n/b) + O(b) = O(\log n) - O(\log b) + O(b) = O(\log n) + O(\log )$, which is nothing special. As long as $b$ on the order of $\log n$, then we won't lose any ground. Perhaps such a structure would be faster in practice due to the fewer allocations. As mentioned, insertions and deletions from the middle could force $O(\log n)$ new nodes per operation in the immutable rope, where as in this its $O(1 / \log n)$ allocations per insertion or deletion because you only would need a new node wheneve you add $\log n$ new characters! This is certainly better and likely indicates significant performace benefits.
-
 \section{Conclusion}
 
 In this paper we have presented the Rope datastructure as described by Hans-J. Boehm, Russ Atkinson and Michael Plass in 1995. It is an efficient datastructure for immutable operations on large strings. We have demonstrated the core operations and algorithms for this datastructure and shown that they operate efficiently.
 
-In addition, we have contributed a novel implementation of the Rope datastructure based on a splay tree representation. We provide benchmarks that show that the datastructure performs extremely well relative to strings in important cases.
+In addition, we have contributed a novel implementation of the Rope datastructure based on a splay tree representation. We provide benchmarks that show that the datastructure performs roughly as expected in several standard scenarios.
 
 Finally, we have presented our visualization of the rope data structure. We implemented a browser-based visualizer that interacts over NaCl with a Rope in order to power a simple text editor. While the editor is in action, we display the internal tree structure of the rope alongside the user's input area. 
 
