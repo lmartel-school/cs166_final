@@ -7,8 +7,8 @@
 class Rope {
 public:
 
-	Rope();
-	Rope(SplayTree *tree);
+	Rope(bool splay);
+	Rope(bool splay, SplayTree *tree);
 	~Rope();
 
 	int length();
@@ -25,6 +25,7 @@ public:
 
 private:
 	SplayTree *tree;
+	bool shouldSplay;
 
 	SplayTree::TreeNode *findNodeWithCharAtIndex(SplayTree::TreeNode *node, int index, int & reportLocalIndex);
 	std::string inOrder(SplayTree::TreeNode *node, SplayTree::TreeNode *start, SplayTree::TreeNode *end);

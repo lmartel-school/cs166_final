@@ -7,11 +7,13 @@
 typedef SplayTree::TreeNode TreeNode;
 using namespace std;
 
-Rope::Rope() {
+Rope::Rope(bool splay) {
+  this->shouldSplay = splay;
   this->tree = new SplayTree(NULL);
 }
 
-Rope::Rope(SplayTree *tree) {
+Rope::Rope(bool splay, SplayTree *tree) {
+  this->shouldSplay = splay;
   this->tree = tree;
 }
 
@@ -48,7 +50,7 @@ string Rope::report(int start, int end){
   res += inOrder(lca, startNode, endNode);
   res += endNode->value->substr(0, 1 + localEnd);
 
-  lca->splay(tree);
+  if(this->shouldSplay) lca->splay(tree);
 
   return res;
 }
@@ -73,14 +75,14 @@ Rope *Rope::concat(Rope *right){
   } else if (rightRoot->isLeaf() && leftRoot->right != NULL && leftRoot->right->isLeaf()){
 	  //cout << "case 2" << endl;
 	  string newStr = *(leftRoot->right->value) + (*(rightRoot->value));
-	  Rope *newLeft = new Rope(new SplayTree(leftRoot->left));
-	  Rope *newRight = new Rope(new SplayTree(new TreeNode(NULL, newStr.length(), new string(newStr))));
+	  Rope *newLeft = new Rope(this->shouldSplay, new SplayTree(leftRoot->left));
+	  Rope *newRight = new Rope(this->shouldSplay, new SplayTree(new TreeNode(NULL, newStr.length(), new string(newStr))));
 	  return newLeft->concat(newRight);
   } else if (leftRoot->isLeaf() && rightRoot->left != NULL && rightRoot->left->isLeaf()){
 	  //cout << "case 3" << endl;
 	  string newStr = *(leftRoot->value) + (*(rightRoot->left->value));
-	  Rope *newLeft = new Rope(new SplayTree(new TreeNode(NULL, newStr.length(), new string(newStr))));
-	  Rope *newRight = new Rope(new SplayTree(rightRoot->right));
+	  Rope *newLeft = new Rope(this->shouldSplay, new SplayTree(new TreeNode(NULL, newStr.length(), new string(newStr))));
+	  Rope *newRight = new Rope(this->shouldSplay, new SplayTree(rightRoot->right));
 	  return newLeft->concat(newRight);
   } else {
 	  //cout << "case 4" << endl;
@@ -113,14 +115,14 @@ Rope *Rope::concat(Rope *right){
   newRoot->setRight(rightRoot);
   */
 
-  Rope *result = new Rope(new SplayTree(newRoot));
+  Rope *result = new Rope(this->shouldSplay, new SplayTree(newRoot));
   // cout << "GOT:" << result->toString() << endl;
   return result;
 }
 
 pair<Rope *, Rope *> Rope::split(int index){
-  if (tree->root == NULL) return make_pair(new Rope(new SplayTree(NULL)), new Rope(new SplayTree(NULL)));
-  if (index < 0) return make_pair(new Rope(new SplayTree(NULL)), this);
+  if (tree->root == NULL) return make_pair(new Rope(this->shouldSplay, new SplayTree(NULL)), new Rope(this->shouldSplay, new SplayTree(NULL)));
+  if (index < 0) return make_pair(new Rope(this->shouldSplay, new SplayTree(NULL)), this);
   int localIndex;
   TreeNode *node = this->findNodeWithCharAtIndex(this->tree->root, index, localIndex);
   // cout << node->toString();
@@ -160,7 +162,7 @@ pair<Rope *, Rope *> Rope::split(int index){
     if (toSlice != NULL){
       up->right = NULL;
       toSlice->parent = NULL;
-      slicedRoots.push(new Rope(new SplayTree(toSlice)));
+      slicedRoots.push(new Rope(this->shouldSplay, new SplayTree(toSlice)));
       weightSliced += sumWeightsDownRightSpine(toSlice);
     }
 
@@ -172,7 +174,7 @@ pair<Rope *, Rope *> Rope::split(int index){
   this->tree->root = cur;
 
   // If we're splitting at the end of the string, append an empty rope
-  if (slicedRoots.empty()) slicedRoots.push(new Rope(new SplayTree(NULL)));
+  if (slicedRoots.empty()) slicedRoots.push(new Rope(this->shouldSplay, new SplayTree(NULL)));
 
   // Merge sliced pieces into single rope
   while (slicedRoots.size() > 1){
@@ -187,7 +189,7 @@ pair<Rope *, Rope *> Rope::split(int index){
 }
 
 Rope *Rope::insert(int index, string *str){
-  Rope *newPiece = new Rope(new SplayTree(new TreeNode(NULL, str->length(), str)));
+  Rope *newPiece = new Rope(this->shouldSplay, new SplayTree(new TreeNode(NULL, str->length(), str)));
   if (tree->root == NULL) return newPiece;
   pair<Rope *, Rope *> pieces = this->split(index - 1);
   return pieces.first->concat(newPiece)->concat(pieces.second);
@@ -217,7 +219,7 @@ TreeNode *Rope::findNodeWithCharAtIndex(TreeNode *node, int index, int & reportL
   if (node->left == NULL && node->right == NULL){
     if (node->parent != NULL){
       // Rebalance tree as much as possible without ripping leaves
-      node->parent->splay(this->tree);
+      if(this->shouldSplay) node->parent->splay(this->tree);
     }
     reportLocalIndex = index;
     return node;
