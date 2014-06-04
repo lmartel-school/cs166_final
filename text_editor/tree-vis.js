@@ -11,7 +11,7 @@ TreeVis = function() {
       .size([this.height, this.width]);
 
   this.diagonal = d3.svg.diagonal()
-      .projection(function(d) { return [d.y, d.x]; });
+      .projection(function(d) { return [d.x, d.y]; });
 
   this.svg = d3.select(".tree-vis").append("svg")
       .attr("width", vis.width + vis.margin + vis.margin)
@@ -36,7 +36,7 @@ TreeVis = function() {
                       ]
                      };
   this.root = flare;
-  this.root.x0 = this.height / 2;
+  this.root.x0 = this.width / 2;
   this.root.y0 = 0;
 
   function collapse(d) {
@@ -49,13 +49,13 @@ TreeVis = function() {
 
   this.root.children.forEach(collapse);
 
-  d3.select(self.frameElement).style("height", "800px");
+  d3.select(self.frameElement).style("height", "500px");
 
 }
 
 TreeVis.prototype.redraw = function(newTree) {
   this.root = newTree;
-  this.root.x0 = this.height / 2;
+  this.root.x0 = this.width / 2;
   this.root.y0 = 0;
   this.update(newTree);
 }
@@ -67,7 +67,7 @@ TreeVis.prototype.update = function(source) {
       links = vis.tree.links(nodes);
 
   // Normalize for fixed-depth.
-  nodes.forEach(function(d) { d.y = d.depth * 80; });
+  nodes.forEach(function(d) { d.y = d.depth * 40; });
 
   // Update the nodes…
   var node = vis.svg.selectAll("g.node")
@@ -76,12 +76,12 @@ TreeVis.prototype.update = function(source) {
   // Enter any new nodes at the parent's previous position.
   var nodeEnter = node.enter().append("g")
       .attr("class", "node")
-      .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-      .on("click", click);
+      .attr("transform", function(d) { return "translate(" + source.x0 + "," + source.y0 + ")"; })
 
   nodeEnter.append("circle")
       .attr("r", 1e-6)
-      .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+      .style("fill", function(d) { return d.name == "NULLNULLNULL" ? "#000" : "#fff";
+      });
 
   nodeEnter.append("text")
       .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
@@ -93,11 +93,11 @@ TreeVis.prototype.update = function(source) {
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
       .duration(vis.duration)
-      .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
   nodeUpdate.select("circle")
       .attr("r", 4.5)
-      .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+      .style("fill", function(d) { return d.name == "NULLNULLNULL" ? "#fff" : "#fff"; });
 
   nodeUpdate.select("text")
       .style("fill-opacity", 1);
@@ -105,7 +105,7 @@ TreeVis.prototype.update = function(source) {
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()
       .duration(vis.duration)
-      .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+      .attr("transform", function(d) { return "translate(" + source.x + "," + source.y + ")"; })
       .remove();
 
   nodeExit.select("circle")
@@ -145,16 +145,4 @@ TreeVis.prototype.update = function(source) {
     d.x0 = d.x;
     d.y0 = d.y;
   });
-
-  // Toggle children on click.
-  function click(d) {
-    if (d.children) {
-      d._children = d.children;
-      d.children = null;
-    } else {
-      d.children = d._children;
-      d._children = null;
-    }
-    vis.redraw();
-  }
 }

@@ -155,9 +155,9 @@ RopeBuf.prototype.removeNode = function(node, dir) {
       this.root = node.right;
     } else {
       if (dir == "left") {
-        parent.left = node.right;
+        node.parent.left = node.right;
       } else {
-        parent.right = node.right;
+        node.parent.right = node.right;
       }
     }
     node.right.parent = node.parent;
@@ -166,9 +166,9 @@ RopeBuf.prototype.removeNode = function(node, dir) {
       this.root = node.left;
     } else {
       if (dir == "left") {
-        parent.left = node.left;
+        node.parent.left = node.left;
       } else {
-        parent.right = node.left;
+        node.parent.right = node.left;
       }
     }
     node.left.parent = node.parent;
@@ -185,11 +185,12 @@ RopeBuf.prototype.removeNode = function(node, dir) {
     // Set up predecessor's size.
     predecessor.leftSize = node.leftSize - predecessor.str.length;
 
-    // Set up predecessor's children.
+    // Set up predecessor's children and parent
     predecessor.right = node.right;
     node.right.parent = predecessor;
     predecessor.left = node.left;
     if (node.left != null) node.left.parent = predecessor;
+    predecessor.parent = node.parent;
 
     // Now let node's parent know.
     if (node == this.root) {
@@ -226,7 +227,7 @@ nodeToString = function(node) {
 };
 
 nodeToJSON = function(node) {
-  if (node == null) return {"name":"NULL"};
+  if (node == null) return {"name":"\u2718"};
   var escapedStr = node.str.replace(/\n/, '\\n');
   while (escapedStr != escapedStr.replace(/\n/, '\\n'))
     escapedStr = escapedStr.replace(/\n/, '\\n');
@@ -269,6 +270,9 @@ RopeBuf.prototype.rotate = function(child) {
       child.right.parent = parent;
     }
     child.right = parent;
+
+    // Update leftSize values:
+    parent.leftSize -= child.leftSize + child.str.length;
   } else {
     parent.right = child.left;
     /* Fix that child's parent if we can. */
@@ -276,6 +280,9 @@ RopeBuf.prototype.rotate = function(child) {
       child.left.parent = parent;
     }
     child.left = parent;
+
+    // Update leftSize values:
+    child.leftSize += parent.leftSize + parent.str.length;
   }
 
   child.parent = parent.parent;
