@@ -1,7 +1,7 @@
 TreeVis = function() {
   var vis = this;
   this.margin = 75;
-  this.width = 750;
+  this.width = 600;
   this.height = 500;
 
   this.i = 0;

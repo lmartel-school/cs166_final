@@ -1,25 +1,31 @@
 <html>
   <head>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
     <title>Ropes Text Editor Visualization</title>
+    <script type="text/javascript" src="common.js"></script>
+    <script type="text/javascript" src="example.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"> </script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="./text-editor.js"></script>
     <script src="./tree-vis.js"></script>
     <script src="./rope.js"></script>
+    <script src="./rope-buf.js"></script>
     <link rel="stylesheet" type="text/css" href="./editor.css"/>
     <link rel="stylesheet" type="text/css" href="./tree.css"/>
     <script>
       $(document).ready(function() {
-          var r = new Rope();
+          var r = new RopeBuf(5);
           var t = new TreeVis($('#tree'));
           var e = new Editor($('#editor'), r, t);
-          t.redraw();
       });
     </script>
   </head>
-  <body>
+  <body data-name="part2" data-tools="newlib glibc pnacl" data-configs="Debug Release" data-path="{tc}/{config}">
     <h1>Ropes Editor:</h1>
     <div id="editor" class="text-editor"></div>
     <div id="tree" class="tree-vis"></div>
+    <div id="listener"></div>
+    <div id="log"></div>
   </body>
 </html>

@@ -26,6 +26,7 @@ public:
 		bool isValidBinaryTree();
 		void toString(int indentationLevel, std::string & builder);
 		std::string toString();
+                std::string toJSON();
 
 		void setLeft(TreeNode *left);
 		void setRight(TreeNode *right);
@@ -36,6 +37,7 @@ public:
 
 		void rotate(TreeNode *parentNode, SplayTree *inTree);
 		TreeNode *getGrandParent();
+                int weight();
 	};
 
 	TreeNode *root;
@@ -51,6 +53,7 @@ public:
 
 	bool isValidBinaryTree();
 	std::string toString();
+	std::string toJSON();
 	
 private:
 	void splayToRoot(TreeNode *node);

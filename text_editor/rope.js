@@ -1,21 +1,34 @@
 Rope = function() {
-  this.str = "";
 };
 
-Rope.prototype.insert = function(pos, ch) {
-  this.str = this.str.substring(0, pos) + ch + this.str.substring(pos);
+Rope.prototype.insert = function(pos, ch, vis) {
+  common.naclModule.postMessage('i' + pos + ' ' + ch);
+  var r = this;
+  common.naclModule.callback = function(ignored) {
+    r.toJSON(function(objStr) {
+      vis.redraw(JSON.parse(objStr));
+    });
+  };
 };
 
-Rope.prototype.remove = function(pos) {
-  this.str = this.str.substring(0, pos) + this.str.substring(pos + 1);
+Rope.prototype.remove = function(pos, vis) {
+  common.naclModule.postMessage('r' + pos + ' ' + (pos + 1));
+  var t = this;
+  common.naclModule.callback = function(ignored) {
+    r.toJSON(function(objStr) {
+      vis.redraw(JSON.parse(objStr));
+    });
+  };
 };
 
-Rope.prototype.string = function() {
-  return this.str;
+Rope.prototype.string = function(fn) {
+  common.naclModule.postMessage('g');
+  common.naclModule.callback = fn;
 };
 
-Rope.prototype.toJSON = function() {
-  return splitString(this.str);
+Rope.prototype.toJSON = function(fn) {
+  common.naclModule.postMessage('j');
+  common.naclModule.callback = fn;
 }
 
 function splitString(str) {

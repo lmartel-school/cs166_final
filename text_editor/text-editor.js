@@ -91,8 +91,7 @@ Editor.prototype.removeCharacter = function(index) {
   this.chars[index].remove();
   this.chars.splice(index, 1);
 
-  this.rope.remove(index);
-  this.vis.redraw(this.rope.toJSON());
+  this.rope.remove(index, this.vis);
 };
 
 Editor.prototype.addCharacter = function(index, ch) {
@@ -100,8 +99,7 @@ Editor.prototype.addCharacter = function(index, ch) {
   newCh.insertBefore(this.chars[index]);
   this.chars.splice(index, 0, newCh);
 
-  this.rope.insert(index, ch);
-  this.vis.redraw(this.rope.toJSON());
+  this.rope.insert(index, ch, this.vis);
 };
 
 Character = function(ch) {

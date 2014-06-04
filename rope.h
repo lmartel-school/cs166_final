@@ -14,6 +14,7 @@ public:
 	int length();
 	char at(int index);
 	std::string report(int start, int end); // incl, excl
+	std::string json();
 
 	std::pair<Rope *, Rope *> split(int index); // split AFTER index
 	Rope *concat(Rope *right);
@@ -21,7 +22,7 @@ public:
 	Rope *remove(int start, int end); // incl, excl
 
 	std::string toString();
-	
+
 private:
 	SplayTree *tree;
 
