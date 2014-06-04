@@ -10,8 +10,10 @@
 #include <cstdlib>
 #include <cstdio>
 
+#define SPLAY 's'
 #define INSERT 'i'
 #define REMOVE 'r'
+#define QUERY 'q'
 #define GET 'g'
 #define JSON 'j'
 
@@ -30,10 +32,14 @@ class HelloTutorialInstance : public pp::Instance {
     if (!var_message.is_string())
       return;
 
-    if (r == NULL) r = new Rope();
-
-    // Get the string message and compare it to "hello".
     std::string message = var_message.AsString();
+
+    if (r == NULL) {
+      bool splay = (message[0] == SPLAY);
+      r = new Rope(splay);
+      return;
+    }
+
     int space = message.find_first_of(' ');
     switch (message[0]) {
       case INSERT: {
@@ -52,6 +58,13 @@ class HelloTutorialInstance : public pp::Instance {
         PostMessage(var_reply);
         break;
                    }
+      case QUERY: {
+        int index = atoi(message.substr(1, space).c_str());
+        r->report(index, index + 1);
+        pp::Var var_reply(r->json());
+        PostMessage(var_reply);
+        break;
+                  }
       case GET: {
         pp::Var var_reply(r->report(0, r->length()));
         PostMessage(var_reply);

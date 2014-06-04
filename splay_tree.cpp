@@ -194,17 +194,40 @@ string TreeNode::toString(){
 
 string escape(string str) {
   return str;
+  /*
+  int quotes_index = 0;
+  while (true) {
+    int newline_index = str.find_first_of('\n');
+    if (newline_index != -1)
+      str = str.substr(0, newline_index) + string("\\\\n") + str.substr(newline_index + 1);
+    if (quotes_index != -1) quotes_index = str.find_first_of('"', quotes_index);
+    if (quotes_index != -1) {
+      str = str.substr(0, quotes_index) + string("\\\\\"") + str.substr(quotes_index + 1);
+      quotes_index += 2;
+    }
+    if (newline_index == -1 && quotes_index == -1) break;
+  }
+  return str;
+  */
+}
+
+string itoa(int a) {
+  if (a == 0) return string("0");
+  string str = "";
+  while (a > 0) {
+    str = string("" + ('0' + a % 10)) + str;
+    a /= 10;
+  }
+  return str;
 }
 
 string TreeNode::toJSON() {
   string str = "{\"name\":";
-  int weight = this->weight();
+  //int weight = this->weight();
   if (value == NULL) {
-    stringstream ss;
-    ss << weight;
-    str += ss.str();
+    str += "\"\""; //"\"" + itoa(weight) + "\"";
   } else {
-    str += "\"" + escape(*value) + "\"";
+    str += "\"'" + escape(*value) + "'\"";
   }
   if (left != NULL || right != NULL) {
     str += ",\"children\":[";
