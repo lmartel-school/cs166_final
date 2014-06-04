@@ -36,3 +36,20 @@ h1 {
   clear: left;
   width: 0px;
 }
+
+.button {
+  display: table;
+  background-color: #657b83;
+  width: 329px;
+  height: 200px;
+  text-align: center;
+  font-size: 60px;
+  margin: 10px;
+  margin-left: 0px;
+  margin-top: 1px;
+  float: left;
+}
+
+.button:hover {
+  background-color: #dc322f;
+}

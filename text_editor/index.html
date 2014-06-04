@@ -14,16 +14,48 @@
     <link rel="stylesheet" type="text/css" href="./editor.css"/>
     <link rel="stylesheet" type="text/css" href="./tree.css"/>
     <script>
+      function start(structure) {
+        var r;
+        if (structure == "r") r = new Rope(false);
+        if (structure == "sr") r = new Rope(true);
+        if (structure == "bt") r = new RopeBuf(5, false);
+        if (structure == "bs") r = new RopeBuf(5, true);
+
+        $('#buttons').remove();
+        t = new TreeVis($('#tree'));
+        e = new Editor($('#editor'), r, t);
+      }
       $(document).ready(function() {
-          var r = new RopeBuf(5, true);
-          var t = new TreeVis($('#tree'));
-          var e = new Editor($('#editor'), r, t);
+          r = new RopeBuf(5, true);
       });
     </script>
   </head>
   <body data-name="part2" data-tools="newlib glibc pnacl" data-configs="Debug Release" data-path="{tc}/{config}">
     <h1>Ropes Editor:</h1>
-    <div id="editor" class="text-editor"></div>
+    <div id="buttons">
+      <h2>Choose your data structure:</h2>
+      <div class="button" onclick="start('r')">
+        <div style="display:table-cell; vertical-align:middle;">
+          <b>Rope</b>
+        </div>
+      </div>
+      <div class="button" onclick="start('sr')">
+        <div style="display:table-cell; vertical-align:middle;">
+          <b>Splay Rope</b>
+        </div>
+      </div>
+      <div class="button" style="clear:left;" onclick="start('bt')">
+        <div style="display:table-cell; vertical-align:middle;">
+          <b>Buffer Tree</b>
+        </div>
+      </div>
+      <div class="button" onclick="start('bs')">
+        <div style="display:table-cell; vertical-align:middle;">
+          <b>Splay Buffer Tree</b>
+        </div>
+      </div>
+    </div>
+    <div id="editor" style="clear: left;" class="text-editor"></div>
     <div id="tree" class="tree-vis"></div>
     <div id="listener"></div>
     <div id="log"></div>
