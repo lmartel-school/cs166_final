@@ -22,6 +22,8 @@ public:
 
 		void splay(SplayTree *inTree);
 		void replaceChild(TreeNode *child, TreeNode *newChild);
+		TreeNode *singleChild(); // if exactly one child, returns that child; otherwise, returns NULL
+		bool isLeaf();
 
 		bool isValidBinaryTree();
 		void toString(int indentationLevel, std::string & builder);

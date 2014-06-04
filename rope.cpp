@@ -55,11 +55,67 @@ string Rope::report(int start, int end){
 
 Rope *Rope::concat(Rope *right){
   Rope *left = this;
-  TreeNode *newRoot = new TreeNode(NULL, left->length(), new string(""));
-  newRoot->setLeft(left->tree->root);
-  newRoot->setRight(right->tree->root);
+  TreeNode *leftRoot = left->tree->root;
+  TreeNode *rightRoot = right->tree->root;
+  if (leftRoot == NULL) return right;
+  if (rightRoot == NULL) return left;
+  
+  //cout << "###MERGING###" << endl;
+  //cout << left->toString() << endl;
+  //cout << right->toString() << endl;
 
-  return new Rope(new SplayTree(newRoot));
+  // Option 1
+  TreeNode *newRoot;
+  if (leftRoot->isLeaf() && rightRoot->isLeaf()){
+	  //cout << "case 1" << endl;
+	  string newStr = *(leftRoot->value) + (*(rightRoot->value));
+	  newRoot = new TreeNode(NULL, newStr.length(), new string(newStr));
+  } else if (rightRoot->isLeaf() && leftRoot->right != NULL && leftRoot->right->isLeaf()){
+	  //cout << "case 2" << endl;
+	  string newStr = *(leftRoot->right->value) + (*(rightRoot->value));
+	  Rope *newLeft = new Rope(new SplayTree(leftRoot->left));
+	  Rope *newRight = new Rope(new SplayTree(new TreeNode(NULL, newStr.length(), new string(newStr))));
+	  return newLeft->concat(newRight);
+  } else if (leftRoot->isLeaf() && rightRoot->left != NULL && rightRoot->left->isLeaf()){
+	  //cout << "case 3" << endl;
+	  string newStr = *(leftRoot->value) + (*(rightRoot->left->value));
+	  Rope *newLeft = new Rope(new SplayTree(new TreeNode(NULL, newStr.length(), new string(newStr))));
+	  Rope *newRight = new Rope(new SplayTree(rightRoot->right));
+	  return newLeft->concat(newRight);
+  } else {
+	  //cout << "case 4" << endl;
+	  newRoot = new TreeNode(NULL, left->length(), NULL);
+	  newRoot->setLeft(left->tree->root);
+	  newRoot->setRight(right->tree->root);
+  }
+
+  /*
+  TreeNode *newRoot;
+  if (leftRoot->isLeaf() && rightRoot->isLeaf()){
+	  string newStr = *(leftRoot->value) + (*(rightRoot->value));
+	  newRoot = new TreeNode(NULL, newStr.length(), new string(newStr));
+  } else {
+	  newRoot = new TreeNode(NULL, left->length(), NULL);
+	  newRoot->setLeft(left->tree->root);
+	  newRoot->setRight(right->tree->root);
+  }
+  */
+  
+  /*
+  // Option 2
+  TreeNode *leftRoot = left->tree->root;
+  TreeNode *rightRoot = right->tree->root;
+  while (leftRoot->singleChild() != NULL) leftRoot = leftRoot->singleChild();
+  while (rightRoot->singleChild() != NULL) rightRoot = rightRoot->singleChild();
+  
+  TreeNode *newRoot = new TreeNode(NULL, left->length(), NULL);
+  newRoot->setLeft(leftRoot);
+  newRoot->setRight(rightRoot);
+  */
+
+  Rope *result = new Rope(new SplayTree(newRoot));
+  // cout << "GOT:" << result->toString() << endl;
+  return result;
 }
 
 pair<Rope *, Rope *> Rope::split(int index){

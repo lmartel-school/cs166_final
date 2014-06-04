@@ -108,6 +108,16 @@ void TreeNode::replaceChild(TreeNode *child, TreeNode *newChild){
   }
 }
 
+TreeNode *TreeNode::singleChild(){
+	if (left == NULL) return right;
+	if (right == NULL) return left;
+	return NULL;
+}
+
+bool TreeNode::isLeaf(){
+	return left == NULL && right == NULL;
+}
+
 TreeNode *TreeNode::getGrandParent(){
   if (parent == NULL) return NULL;
 
@@ -158,7 +168,7 @@ void indent(int indentationLevel, string & builder) {
 }
 
 void TreeNode::toString(int indentationLevel, string & builder){
-  builder.append("lol, to_string is broken --");
+  // builder.append(to_string(key) + " --"); // TODO comment out when compiling in NaCl
   if (value != NULL) builder.append(*value);
   builder.append("\n");
   indentationLevel++;
