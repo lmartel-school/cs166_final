@@ -16,18 +16,21 @@
     <script>
       function start(structure) {
         var r;
-        if (structure == "r") r = new Rope(false);
-        if (structure == "sr") r = new Rope(true);
+        if (structure == "r") {
+          common.naclModule.postMessage(' ');
+          r = new Rope(false);
+        }
+        if (structure == "sr") {
+          common.naclModule.postMessage('s');
+          r = new Rope(true);
+        }
         if (structure == "bt") r = new RopeBuf(5, false);
         if (structure == "bs") r = new RopeBuf(5, true);
 
         $('#buttons').remove();
-        t = new TreeVis($('#tree'));
-        e = new Editor($('#editor'), r, t);
+        var t = new TreeVis($('#tree'));
+        var e = new Editor($('#editor'), r, t);
       }
-      $(document).ready(function() {
-          r = new RopeBuf(5, true);
-      });
     </script>
   </head>
   <body data-name="part2" data-tools="newlib glibc pnacl" data-configs="Debug Release" data-path="{tc}/{config}">

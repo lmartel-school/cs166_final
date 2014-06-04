@@ -73,12 +73,13 @@ Editor.prototype.moveCursor = function(dir) {
 Editor.prototype.keypress = function(e) {
   var ch;
   switch (e.which) {
-    case 8:  this.removeCharacter(this.cursor - 1);
+    case 8:  e.preventDefault();
+             this.removeCharacter(this.cursor - 1);
              if (this.cursor != 0) this.cursor--;
-             e.preventDefault();
              return;
-    case 13: ch = '\n'
-             break;
+    case 13: if (this.cursor == this.chars.length - 1) return;
+             this.rope.query(this.cursor, this.vis);
+             return;
     default: ch = String.fromCharCode(e.which);
              break;
   }

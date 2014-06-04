@@ -140,6 +140,21 @@ RopeBuf.prototype.remove = function(pos, vis) {
   vis.redraw(this.toJSON());
 };
 
+RopeBuf.prototype.query = function(pos, vis) {
+  var node = this.root;
+  while (true) {
+    if (pos < node.leftSize) {
+      node = node.left;
+    } else if (pos >= node.leftSize + node.str.length) {
+      node = node.right;
+    } else {
+      break;
+    }
+  }
+  this.splay(node);
+  vis.redraw(this.toJSON());
+}
+
 RopeBuf.prototype.removeNode = function(node, dir) {
   // Special case don't delete root when it's all that's left
   if (node == this.root && node.left == null && node.right == null) return;
@@ -231,7 +246,7 @@ nodeToJSON = function(node) {
   var escapedStr = node.str.replace(/\n/, '\\n');
   while (escapedStr != escapedStr.replace(/\n/, '\\n'))
     escapedStr = escapedStr.replace(/\n/, '\\n');
-  var json = {"name" : escapedStr};
+  var json = {"name" : "'" + escapedStr + "'"};
   var children = [];
   children.push(nodeToJSON(node.left));
   children.push(nodeToJSON(node.right));

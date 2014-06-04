@@ -21,6 +21,16 @@ Rope.prototype.remove = function(pos, vis) {
   };
 };
 
+Rope.prototype.query = function(index, vis) {
+  common.naclModule.postMessage('q' + index);
+  var r = this;
+  common.naclModule.callback = function(ignored) {
+    r.toJSON(function(objStr) {
+      vis.redraw(JSON.parse(objStr));
+    });
+  };
+}
+
 Rope.prototype.string = function(fn) {
   common.naclModule.postMessage('g');
   common.naclModule.callback = fn;
