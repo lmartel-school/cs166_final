@@ -63,7 +63,6 @@ Rope *Rope::concat(Rope *right){
 }
 
 pair<Rope *, Rope *> Rope::split(int index){
-<<<<<<< HEAD
   if (tree->root == NULL) return make_pair(new Rope(new SplayTree(NULL)), new Rope(new SplayTree(NULL)));
   if (index < 0) return make_pair(new Rope(new SplayTree(NULL)), this);
   int localIndex;
@@ -129,78 +128,6 @@ pair<Rope *, Rope *> Rope::split(int index){
   }
 
   return make_pair(this, slicedRoots.top());
-=======
-  if (tree->root == NULL) return make_pair(new Rope(new SplayTree(NULL)), new Rope(new SplayTree(NULL)));
-  if (index < 0) return make_pair(new Rope(new SplayTree(NULL)), this);
-  
-  // cout << "seeking: " << index << endl;
-  // cout << "in: " << tree->toString() << endl;
-  int localIndex;
-  TreeNode *node = this->findNodeWithCharAtIndex(this->tree->root, index, localIndex);
-  // cout << this->report(0, this->length()) << endl;
-  
-  // cout << "found: " << node->toString() << endl;
-  
-  string *fullString = node->value;
-  int fullLength = fullString->length();
-  int leftLength = localIndex + 1;
-  int rightLength = fullLength - leftLength;
-  // cout << leftLength << " vs " << fullLength << endl;
-  assert(leftLength <= fullLength);
-
-  // If char before split is not the last char in a node, we must split that node
-  if (leftLength != fullLength){
-    TreeNode *newNode = new TreeNode(node->parent, leftLength, NULL);
-    newNode->left = new TreeNode(newNode, leftLength, new string(fullString->substr(0, leftLength)));
-    newNode->right = new TreeNode(newNode, rightLength, new string(fullString->substr(leftLength)));
-
-    if (newNode->parent != NULL) newNode->parent->replaceChild(node, newNode);
-    // delete node;
-    node = newNode->left;
-    // cout << newNode->toString() << endl;
-  }
-
-  // cout << node->toString() << endl;
-
-  int weightSliced = 0;
-  stack<Rope *> slicedRoots;
-
-  // Do the split (see https://en.wikipedia.org/wiki/Rope_(computer_science)#Split)
-  TreeNode *cur = node;
-  while (cur->parent != NULL){
-    TreeNode *up = cur->parent;
-    if (cur == up->right) break;
-
-    up->key -= weightSliced;
-    TreeNode *toSlice = up->right;
-    if (toSlice != NULL){
-      up->right = NULL;
-      toSlice->parent = NULL;
-      slicedRoots.push(new Rope(new SplayTree(toSlice)));
-      weightSliced += sumWeightsDownRightSpine(toSlice);
-    }
-
-    cur = up;
-  }
-
-  // Find the new root of the old tree
-  while (cur->parent != NULL) cur = cur->parent;
-  this->tree->root = cur;
-
-  // If we're splitting at the end of the string, append an empty rope
-  if (slicedRoots.empty()) slicedRoots.push(new Rope(new SplayTree(NULL)));
-
-  // Merge sliced pieces into single rope
-  while (slicedRoots.size() > 1){
-    Rope *right = slicedRoots.top();
-    slicedRoots.pop();
-    Rope *left = slicedRoots.top();
-    slicedRoots.pop();
-    slicedRoots.push(left->concat(right));
-  }
-
-  return make_pair(this, slicedRoots.top());
->>>>>>> 7496801452a53cb98acdbc16c45feb8711f436ea
 }
 
 Rope *Rope::insert(int index, string *str){
